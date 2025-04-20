@@ -1,12 +1,12 @@
 'use client'
 import { useState } from 'react'
+import { supabase } from '@/lib/supabase'
 
-type Props = {
-  overlay: string
+export default function MessageForm({
+  onComplete,
+}: {
   onComplete?: () => void
-}
-
-export default function MessageForm({ overlay, onComplete }: Props) {
+}) {
   const [nickname, setNickname] = useState('')
   const [message, setMessage] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -15,63 +15,67 @@ export default function MessageForm({ overlay, onComplete }: Props) {
     e.preventDefault()
 
     try {
-      // TODO: Supabase 연동으로 교체
-      const payload = {
+      const { error } = await supabase.from('messages').insert({
         nickname,
         message,
-        overlay,
-        timestamp: new Date().toISOString(),
-      }
+      })
 
-      console.log('📦 Supabase로 보낼 데이터:', payload)
+      if (error) throw error
+
       setSubmitted(true)
       setTimeout(() => {
-        onComplete?.()
-      }, 1000)
+        onComplete?.() // ✅ 여기서 상위 컴포넌트로 알려줌
+      }, 500)
     } catch (err) {
       console.error('제출 중 오류:', err)
-      alert('오류가 발생했습니다.')
+      alert('메시지 제출 중 오류가 발생했습니다.')
     }
   }
 
+  if (submitted) {
+    return (
+      <div className="text-center text-green-600 text-sm py-4">
+        💌 메시지가 성공적으로 등록되었어요!
+      </div>
+    )
+  }
+
   return (
-    <div className="mt-4">
-      {submitted ? (
-        <p className="text-center">응원 메시지가 제출되었습니다! 💌</p>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">닉네임</label>
-            <input
-              type="text"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              required
-              className="w-full mt-1 px-3 py-2 border rounded shadow-sm text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">지지 메시지</label>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              required
-              maxLength={300}
-              rows={4}
-              className="w-full mt-1 px-3 py-2 border rounded shadow-sm text-sm"
-            />
-            <p className="text-xs text-right text-gray-400 mt-1">
-              {message.length} / 300자
-            </p>
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-[#415E9A] text-white py-2 rounded hover:bg-blue-500 transition"
-          >
-            제출
-          </button>
-        </form>
-      )}
-    </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          닉네임 (또는 익명)
+        </label>
+        <input
+          type="text"
+          required
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
+          className="w-full border px-3 py-2 rounded text-sm"
+          placeholder="예: 익명의 지지자"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          메시지
+        </label>
+        <textarea
+          required
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          rows={4}
+          className="w-full border px-3 py-2 rounded text-sm"
+          placeholder="힘이 되는 메시지를 남겨주세요!"
+        />
+      </div>
+
+      <button
+        type="submit"
+        className="w-full bg-blue-600 text-white py-2 rounded text-sm hover:bg-blue-700"
+      >
+        ✍ 메시지 남기기
+      </button>
+    </form>
   )
 }
