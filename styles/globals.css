@@ -27,3 +27,12 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+/* globals.css 또는 tailwind.css에 */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

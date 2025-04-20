@@ -41,7 +41,7 @@ export default function MessageList() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="flex flex-col gap-4">
         {messages.map((item, idx) => (
           <div
             key={idx}
