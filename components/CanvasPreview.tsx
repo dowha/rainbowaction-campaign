@@ -222,31 +222,48 @@ export default function CanvasPreview({ image, overlay }: Props) {
       startDragging,
     ] // Added startDragging dependency
   )
-
   const handleInteractionMove = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
-      if (!isDragging || isFullAsset) return // Only move if dragging is active
+      if (!isDragging || isFullAsset) return // 드래그 중 아니거나, 전체 에셋이면 리턴
 
-      // Prevent scrolling during drag on mobile (redundant if start prevented, but safe)
-      // if ('touches' in e.nativeEvent) {
-      //   e.preventDefault(); // Optional: Can sometimes help ensure smooth drag
-      // }
+      // 모바일 스크롤 방지
+      if ('touches' in e.nativeEvent) {
+        e.preventDefault()
+      }
 
       const coords = getCoords(e.nativeEvent)
-      if (!coords) return
+      if (!coords) return // 좌표 얻기 실패 시 리턴
 
+      // 새 위치 계산 (현재 마우스/터치 위치 - 드래그 시작 시 에셋 내부 오프셋)
       let newX = coords.x - dragStartOffset.current.x
       let newY = coords.y - dragStartOffset.current.y
 
       const canvas = canvasRef.current
       if (canvas) {
-        const overlayDrawSize = scale * canvas.width * 0.3
-        newX = Math.max(0, Math.min(newX, canvas.width - overlayDrawSize))
-        newY = Math.max(0, Math.min(newY, canvas.height - overlayDrawSize))
+        const overlayDrawSize = scale * canvas.width * 0.3 // 현재 스케일 기준 에셋 크기
+
+        // --- 경계 제한 로직 수정 ---
+        // 에셋의 가장자리가 캔버스 밖으로 얼마나 나갈 수 있는지 설정 (비율)
+        // 0 = 완전히 캔버스 내부, 0.5 = 에셋의 중심이 캔버스 가장자리에 닿을 수 있음
+        const allowanceFactor = 0.25 // 예: 에셋 크기의 25% 만큼 밖으로 나가는 것을 허용
+        const allowance = overlayDrawSize * allowanceFactor // 허용되는 픽셀 값
+
+        // 새 경계값 계산
+        const minX = -allowance // 최소 X 좌표 (음수 허용)
+        const minY = -allowance // 최소 Y 좌표 (음수 허용)
+        const maxX = canvas.width - overlayDrawSize + allowance // 최대 X 좌표
+        const maxY = canvas.height - overlayDrawSize + allowance // 최대 Y 좌표
+
+        // 계산된 경계 내로 newX, newY 값 제한
+        newX = Math.max(minX, Math.min(newX, maxX))
+        newY = Math.max(minY, Math.min(newY, maxY))
+        // --- 로직 수정 끝 ---
       }
+
+      // 최종 계산된 위치로 에셋 상태 업데이트 -> 리렌더링 및 다시 그리기 트리거
       setOverlayPos({ x: newX, y: newY })
     },
-    [isDragging, isFullAsset, getCoords, scale]
+    [isDragging, isFullAsset, getCoords, scale] // 의존성 배열
   )
 
   const handleInteractionEnd = useCallback(() => {
