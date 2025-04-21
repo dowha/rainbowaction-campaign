@@ -77,6 +77,8 @@ export default function Step2_PreviewAndDownload({
                   width={48}
                   height={48}
                   className="mb-1"
+                  draggable={false}
+                  onContextMenu={(e) => e.preventDefault()}
                 />
                 <span className="text-center whitespace-pre-line leading-tight">
                   {label}

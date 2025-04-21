@@ -82,6 +82,8 @@ export default function Step1_UploadAndSelect({
                       fill
                       className="object-contain"
                       sizes="48px"
+                      draggable={false}
+                      onContextMenu={(e) => e.preventDefault()}
                     />
                   </div>
                   <span className="whitespace-pre-line leading-tight min-h-[2.75rem] flex items-center justify-center">
