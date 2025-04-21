@@ -1,4 +1,3 @@
-// CanvasPreview.tsx
 import { useEffect, useRef, useState } from 'react'
 
 interface Props {
@@ -95,8 +94,21 @@ export default function CanvasPreview({ image, overlay }: Props) {
     return { x: clientX, y: clientY }
   }
 
+  const isWithinOverlay = (x: number, y: number) => {
+    const s = scale * 720 * 0.3
+    return (
+      x >= overlayPos.x &&
+      x <= overlayPos.x + s &&
+      y >= overlayPos.y &&
+      y <= overlayPos.y + s
+    )
+  }
+
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
     if (isFullAsset) return
+
+    const coords = getCoords(e.nativeEvent)
+    if (!isWithinOverlay(coords.x, coords.y)) return
 
     if ('touches' in e.nativeEvent) {
       setTouchReady(false)
@@ -108,7 +120,6 @@ export default function CanvasPreview({ image, overlay }: Props) {
       setIsDragging(true)
     }
 
-    const coords = getCoords(e.nativeEvent)
     dragStart.current = {
       x: coords.x - overlayPos.x,
       y: coords.y - overlayPos.y,
@@ -192,7 +203,7 @@ export default function CanvasPreview({ image, overlay }: Props) {
           <div className="mt-5 space-y-3">
             <a
               onClick={() => window.location.reload()}
-              className="block w-full text-center px-4 py-2 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition cursor-pointer"
+              className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition cursor-pointer"
             >
               사진 다시 올리기
             </a>
@@ -200,7 +211,7 @@ export default function CanvasPreview({ image, overlay }: Props) {
               href={downloadUrl}
               download="campaign-image.png"
               target="_blank"
-              className="block w-full text-center px-4 py-2 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition"
+              className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition"
             >
               이미지 다운로드
             </a>
