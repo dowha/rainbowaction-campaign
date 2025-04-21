@@ -19,14 +19,20 @@ export default function CanvasPreview({ image, overlay }: Props) {
     overlay
   )
 
-  // asset01이면 처음 선택 시 상단 중앙 배치 (크기는 useState 초기값으로 처리됨)
   useEffect(() => {
-    if (
-      overlay === 'asset01.png' &&
-      overlayPos.x === 240 &&
-      overlayPos.y === 240
-    ) {
-      setOverlayPos({ x: 240, y: 30 })
+    if (overlayPos.x === 240 && overlayPos.y === 240) {
+      if (
+        overlay === 'asset01.png' ||
+        overlay === 'asset02.png' ||
+        overlay === 'asset03.png' ||
+        overlay === 'asset04.png'
+      ) {
+        setOverlayPos({ x: 240, y: 30 })
+      } else if (overlay === 'asset05.png' || overlay === 'asset06.png') {
+        setOverlayPos({ x: 400, y: 240 })
+      } else if (overlay === 'asset07.png') {
+        setOverlayPos({ x: 240, y: 240 })
+      }
     }
   }, [overlay, overlayPos])
 
@@ -49,16 +55,24 @@ export default function CanvasPreview({ image, overlay }: Props) {
         canvas.style.width = `${displaySize}px`
         canvas.style.height = `${displaySize}px`
 
-        const ratio = Math.min(
-          exportSize / baseImage.width,
-          exportSize / baseImage.height
-        )
-        const w = baseImage.width * ratio
-        const h = baseImage.height * ratio
-        const x = (exportSize - w) / 2
-        const y = (exportSize - h) / 2
         ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.drawImage(baseImage, x, y, w, h)
+
+        // ✅ 정사각형 중앙 크롭 로직
+        const short = Math.min(baseImage.width, baseImage.height)
+        const sx = (baseImage.width - short) / 2
+        const sy = (baseImage.height - short) / 2
+
+        ctx.drawImage(
+          baseImage,
+          sx,
+          sy,
+          short,
+          short,
+          0,
+          0,
+          exportSize,
+          exportSize
+        )
 
         if (isFullAsset) {
           ctx.drawImage(overlayImg, 0, 0, exportSize, exportSize)
@@ -76,24 +90,35 @@ export default function CanvasPreview({ image, overlay }: Props) {
     baseImage.src = image instanceof File ? URL.createObjectURL(image) : ''
   }, [image, overlay, overlayPos, scale, isFullAsset])
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  // ✅ 공통 좌표 계산
+  const getCoords = (e: MouseEvent | TouchEvent) => {
+    const clientX =
+      'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX
+    const clientY =
+      'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY
+    return { x: clientX, y: clientY }
+  }
+
+  const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
     if (isFullAsset) return
     setIsDragging(true)
+    const coords = getCoords(e.nativeEvent)
     dragStart.current = {
-      x: e.clientX - overlayPos.x,
-      y: e.clientY - overlayPos.y,
+      x: coords.x - overlayPos.x,
+      y: coords.y - overlayPos.y,
     }
   }
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDragging || isFullAsset) return
+    const coords = getCoords(e.nativeEvent)
     setOverlayPos({
-      x: e.clientX - dragStart.current.x,
-      y: e.clientY - dragStart.current.y,
+      x: coords.x - dragStart.current.x,
+      y: coords.y - dragStart.current.y,
     })
   }
 
-  const handleMouseUp = () => setIsDragging(false)
+  const handleEnd = () => setIsDragging(false)
 
   return (
     <div className="mt-1 text-center select-none">
@@ -101,17 +126,20 @@ export default function CanvasPreview({ image, overlay }: Props) {
 
       <div className="mx-auto max-w-sm w-full bg-gray-50 border border-gray-200 rounded-2xl shadow-sm px-4 py-5">
         <div
-          className="relative"
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
+          className="relative touch-none"
+          onMouseDown={handleStart}
+          onMouseMove={handleMove}
+          onMouseUp={handleEnd}
+          onMouseLeave={handleEnd}
+          onTouchStart={handleStart}
+          onTouchMove={handleMove}
+          onTouchEnd={handleEnd}
         >
           <canvas
             ref={canvasRef}
-            onMouseDown={handleMouseDown}
             className={`mx-auto border border-gray-300 rounded bg-white ${
               isFullAsset ? 'cursor-default' : 'cursor-move'
-            }`}
+            } transition-all duration-200 ease-out`}
           />
         </div>
 
@@ -121,22 +149,31 @@ export default function CanvasPreview({ image, overlay }: Props) {
             <input
               type="range"
               min="0.5"
-              max="2"
+              max="3"
               step="0.05"
               value={scale}
               onChange={(e) => setScale(parseFloat(e.target.value))}
-              className="w-full"
+              className="w-full h-6 accent-blue-600 touch-none cursor-pointer"
             />
           </div>
         )}
 
         {downloadUrl && (
-          <div className="mt-5">
+          <div className="mt-5 space-y-3">
+            <a
+              onClick={() => {
+                window.location.reload() // 상태 초기화하고 Step1로 이동
+              }}
+              className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition cursor-pointer"
+            >
+              사진 다시 올리기
+            </a>
+
             <a
               href={downloadUrl}
               download="campaign-image.png"
               target="_blank"
-              className="inline-block w-full text-center px-4 py-2 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition"
+              className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition"
             >
               이미지 다운로드
             </a>
