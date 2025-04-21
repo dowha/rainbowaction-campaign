@@ -30,14 +30,18 @@ export default function CanvasPreview({ image, overlay }: Props) {
   const dragStartOffset = useRef({ x: 0, y: 0 })
   const longPressTimer = useRef<NodeJS.Timeout | null>(null)
   const objectUrlRef = useRef<string | null>(null)
-  const originalBodyOverflowY = useRef<string>('') // Store original body overflow-y
+  const originalBodyOverflowY = useRef<string>('')
+
+  // *** 추가: 터치가 에셋 위에서 시작되었는지 추적하는 ref ***
+  const touchStartedOnAsset = useRef(false)
 
   const isFullAsset = isFullAssetOverlay(overlay)
   const isMobile =
     typeof window !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent)
 
-  // --- Canvas Drawing Effect ---
+  // --- Canvas Drawing Effect (변경 없음) ---
   useEffect(() => {
+    // ... (이전과 동일)
     const canvas = canvasRef.current
     if (!canvas || !image) return
     const ctx = canvas.getContext('2d')
@@ -106,7 +110,10 @@ export default function CanvasPreview({ image, overlay }: Props) {
       baseImage.src = currentObjectUrl
     } else {
       console.warn('Image prop is not a File object.')
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      if (ctx) {
+        // ctx가 유효할 때만 clearRect 호출
+        ctx.clearRect(0, 0, canvas?.width ?? 0, canvas?.height ?? 0)
+      }
       setDownloadUrl(null)
     }
 
@@ -119,14 +126,13 @@ export default function CanvasPreview({ image, overlay }: Props) {
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current)
       }
-      // Ensure body scroll is reset if component unmounts while dragging
       if (document.body.style.overflowY !== originalBodyOverflowY.current) {
         document.body.style.overflowY = originalBodyOverflowY.current
       }
     }
   }, [image, overlay, overlayPos, scale, isFullAsset])
 
-  // --- Interaction Helper Functions ---
+  // --- Interaction Helper Functions (변경 없음) ---
   const getCoords = useCallback(
     (e: MouseEvent | TouchEvent): { x: number; y: number } | null => {
       const canvas = canvasRef.current
@@ -163,54 +169,51 @@ export default function CanvasPreview({ image, overlay }: Props) {
     [scale, overlayPos.x, overlayPos.y, isFullAsset]
   )
 
-  // --- Start Drag Action ---
+  // --- Start Drag Action (변경 없음) ---
   const startDragging = useCallback(() => {
     if (!isDragging) {
-      // Prevent multiple calls
       setIsDragging(true)
-      // FIX 1: Prevent PC screen flicker by forcing scrollbar visibility
-      originalBodyOverflowY.current = document.body.style.overflowY // Store original value
-      document.body.style.overflowY = 'scroll' // Force scrollbar track
+      originalBodyOverflowY.current = document.body.style.overflowY
+      document.body.style.overflowY = 'scroll'
     }
-  }, [isDragging]) // Dependency on isDragging
+  }, [isDragging])
 
-  // --- Event Handlers ---
+  // --- Event Handlers (수정됨) ---
   const handleInteractionStart = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
       if (isFullAsset) return
       const coords = getCoords(e.nativeEvent)
 
-      // If touch/click is OUTSIDE the overlay, do nothing (allow default browser action like scroll)
-      if (!coords || !isWithinOverlay(coords.x, coords.y)) {
-        // Make sure long press timer is cleared if user taps outside while waiting
+      // *** 수정: 터치 시작 위치에 따라 ref 설정 ***
+      if (coords && isWithinOverlay(coords.x, coords.y)) {
+        // 에셋 내부에서 시작
+        touchStartedOnAsset.current = true // 플래그 설정
+
+        // 이전과 동일: 스크롤 방지 및 드래그 준비
+        if ('touches' in e.nativeEvent) {
+          e.preventDefault()
+        }
+        dragStartOffset.current = {
+          x: coords.x - overlayPos.x,
+          y: coords.y - overlayPos.y,
+        }
+        if ('touches' in e.nativeEvent) {
+          if (longPressTimer.current) clearTimeout(longPressTimer.current)
+          longPressTimer.current = setTimeout(() => {
+            startDragging()
+            longPressTimer.current = null
+          }, 400)
+        } else {
+          startDragging()
+        }
+      } else {
+        // 에셋 외부에서 시작
+        touchStartedOnAsset.current = false // 플래그 해제
         if (longPressTimer.current) {
           clearTimeout(longPressTimer.current)
           longPressTimer.current = null
         }
-        return
-      }
-
-      // --- Touch/click is INSIDE the overlay ---
-      // FIX 2: Prevent default only when starting drag INSIDE the asset (for touch)
-      if ('touches' in e.nativeEvent) {
-        e.preventDefault() // Prevent scroll/zoom etc. ONLY when starting drag on asset
-      }
-
-      dragStartOffset.current = {
-        x: coords.x - overlayPos.x,
-        y: coords.y - overlayPos.y,
-      }
-
-      // --- Handle Long Press vs Immediate Drag ---
-      if ('touches' in e.nativeEvent) {
-        if (longPressTimer.current) clearTimeout(longPressTimer.current)
-        longPressTimer.current = setTimeout(() => {
-          startDragging() // Call common function to set state and body style
-          longPressTimer.current = null
-        }, 400)
-      } else {
-        // Mouse: start dragging immediately
-        startDragging()
+        // 여기서 return (기본 스크롤 허용)
       }
     },
     [
@@ -220,66 +223,58 @@ export default function CanvasPreview({ image, overlay }: Props) {
       overlayPos.x,
       overlayPos.y,
       startDragging,
-    ] // Added startDragging dependency
+    ]
   )
+
   const handleInteractionMove = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
-      if (!isDragging || isFullAsset) return // 드래그 중 아니거나, 전체 에셋이면 리턴
-
-      // 모바일 스크롤 방지
-      if ('touches' in e.nativeEvent) {
+      // *** 수정: isDragging 대신 touchStartedOnAsset ref 확인하여 preventDefault 호출 ***
+      if ('touches' in e.nativeEvent && touchStartedOnAsset.current) {
+        // 터치가 에셋 위에서 시작되었다면, 드래그 상태(isDragging)와 관계없이
+        // touchmove 이벤트의 기본 스크롤 동작 방지
         e.preventDefault()
       }
 
-      const coords = getCoords(e.nativeEvent)
-      if (!coords) return // 좌표 얻기 실패 시 리턴
+      // 드래그 중일 때만 위치 업데이트 (이전과 동일)
+      if (!isDragging || isFullAsset) return
 
-      // 새 위치 계산 (현재 마우스/터치 위치 - 드래그 시작 시 에셋 내부 오프셋)
+      const coords = getCoords(e.nativeEvent)
+      if (!coords) return
+
       let newX = coords.x - dragStartOffset.current.x
       let newY = coords.y - dragStartOffset.current.y
 
       const canvas = canvasRef.current
       if (canvas) {
-        const overlayDrawSize = scale * canvas.width * 0.3 // 현재 스케일 기준 에셋 크기
-
-        // --- 경계 제한 로직 수정 ---
-        // 에셋의 가장자리가 캔버스 밖으로 얼마나 나갈 수 있는지 설정 (비율)
-        // 0 = 완전히 캔버스 내부, 0.5 = 에셋의 중심이 캔버스 가장자리에 닿을 수 있음
-        const allowanceFactor = 0.25 // 예: 에셋 크기의 25% 만큼 밖으로 나가는 것을 허용
-        const allowance = overlayDrawSize * allowanceFactor // 허용되는 픽셀 값
-
-        // 새 경계값 계산
-        const minX = -allowance // 최소 X 좌표 (음수 허용)
-        const minY = -allowance // 최소 Y 좌표 (음수 허용)
-        const maxX = canvas.width - overlayDrawSize + allowance // 최대 X 좌표
-        const maxY = canvas.height - overlayDrawSize + allowance // 최대 Y 좌표
-
-        // 계산된 경계 내로 newX, newY 값 제한
+        const overlayDrawSize = scale * canvas.width * 0.3
+        const allowanceFactor = 0.25 // 허용 범위 (이전과 동일)
+        const allowance = overlayDrawSize * allowanceFactor
+        const minX = -allowance
+        const minY = -allowance
+        const maxX = canvas.width - overlayDrawSize + allowance
+        const maxY = canvas.height - overlayDrawSize + allowance
         newX = Math.max(minX, Math.min(newX, maxX))
         newY = Math.max(minY, Math.min(newY, maxY))
-        // --- 로직 수정 끝 ---
       }
-
-      // 최종 계산된 위치로 에셋 상태 업데이트 -> 리렌더링 및 다시 그리기 트리거
       setOverlayPos({ x: newX, y: newY })
     },
-    [isDragging, isFullAsset, getCoords, scale] // 의존성 배열
+    // 의존성 배열에서 touchStartedOnAsset는 ref이므로 추가할 필요 없음
+    [isDragging, isFullAsset, getCoords, scale]
   )
 
   const handleInteractionEnd = useCallback(() => {
-    // Clear pending long press timer
+    // *** 수정: 터치 종료 시 ref 초기화 ***
+    touchStartedOnAsset.current = false // 플래그 해제
+
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current)
       longPressTimer.current = null
     }
-    // Only reset styles if dragging was actually active
     if (isDragging) {
       setIsDragging(false)
-      // FIX 1: Restore original body overflow
       document.body.style.overflowY = originalBodyOverflowY.current
     }
-  }, [isDragging]) // Dependency on isDragging
-
+  }, [isDragging]) // isDragging 의존성 유지
   // --- Render ---
   return (
     <div className="mt-1 text-center select-none">
