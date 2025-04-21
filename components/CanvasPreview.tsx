@@ -171,10 +171,13 @@ export default function CanvasPreview({ image, overlay }: Props) {
   const startDragging = useCallback(() => {
     if (!isDragging) {
       setIsDragging(true)
-      originalBodyOverflowY.current = document.body.style.overflowY
-      document.body.style.overflowY = 'hidden' // 수정: scroll → hidden (페이지 스크롤 완전히 방지)
+      // 모바일에서만 body overflow를 변경하고, PC에서는 변경하지 않음
+      if (isMobile) {
+        originalBodyOverflowY.current = document.body.style.overflowY
+        document.body.style.overflowY = 'hidden'
+      }
     }
-  }, [isDragging])
+  }, [isDragging, isMobile])
 
   // --- Event Handlers (수정됨) ---
   const handleInteractionStart = useCallback(
@@ -267,9 +270,12 @@ export default function CanvasPreview({ image, overlay }: Props) {
     }
     if (isDragging) {
       setIsDragging(false)
-      document.body.style.overflowY = originalBodyOverflowY.current
+      // 모바일에서만 body overflow를 복원
+      if (isMobile && originalBodyOverflowY.current !== '') {
+        document.body.style.overflowY = originalBodyOverflowY.current
+      }
     }
-  }, [isDragging])
+  }, [isDragging, isMobile])
 
   // Canvas 요소에 대한 passive: false 설정을 위한 useEffect
   useEffect(() => {
