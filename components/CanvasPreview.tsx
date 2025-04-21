@@ -32,16 +32,15 @@ export default function CanvasPreview({ image, overlay }: Props) {
   const objectUrlRef = useRef<string | null>(null)
   const originalBodyOverflowY = useRef<string>('')
 
-  // *** 추가: 터치가 에셋 위에서 시작되었는지 추적하는 ref ***
+  // 터치가 에셋 위에서 시작되었는지 추적하는 ref
   const touchStartedOnAsset = useRef(false)
 
   const isFullAsset = isFullAssetOverlay(overlay)
   const isMobile =
     typeof window !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent)
 
-  // --- Canvas Drawing Effect (변경 없음) ---
+  // --- Canvas Drawing Effect ---
   useEffect(() => {
-    // ... (이전과 동일)
     const canvas = canvasRef.current
     if (!canvas || !image) return
     const ctx = canvas.getContext('2d')
@@ -111,7 +110,6 @@ export default function CanvasPreview({ image, overlay }: Props) {
     } else {
       console.warn('Image prop is not a File object.')
       if (ctx) {
-        // ctx가 유효할 때만 clearRect 호출
         ctx.clearRect(0, 0, canvas?.width ?? 0, canvas?.height ?? 0)
       }
       setDownloadUrl(null)
@@ -132,7 +130,7 @@ export default function CanvasPreview({ image, overlay }: Props) {
     }
   }, [image, overlay, overlayPos, scale, isFullAsset])
 
-  // --- Interaction Helper Functions (변경 없음) ---
+  // --- Interaction Helper Functions ---
   const getCoords = useCallback(
     (e: MouseEvent | TouchEvent): { x: number; y: number } | null => {
       const canvas = canvasRef.current
@@ -169,12 +167,12 @@ export default function CanvasPreview({ image, overlay }: Props) {
     [scale, overlayPos.x, overlayPos.y, isFullAsset]
   )
 
-  // --- Start Drag Action (변경 없음) ---
+  // --- Start Drag Action ---
   const startDragging = useCallback(() => {
     if (!isDragging) {
       setIsDragging(true)
       originalBodyOverflowY.current = document.body.style.overflowY
-      document.body.style.overflowY = 'scroll'
+      document.body.style.overflowY = 'hidden' // 수정: scroll → hidden (페이지 스크롤 완전히 방지)
     }
   }, [isDragging])
 
@@ -184,19 +182,20 @@ export default function CanvasPreview({ image, overlay }: Props) {
       if (isFullAsset) return
       const coords = getCoords(e.nativeEvent)
 
-      // *** 수정: 터치 시작 위치에 따라 ref 설정 ***
       if (coords && isWithinOverlay(coords.x, coords.y)) {
         // 에셋 내부에서 시작
         touchStartedOnAsset.current = true // 플래그 설정
 
-        // 이전과 동일: 스크롤 방지 및 드래그 준비
+        // 중요: 터치 이벤트인 경우 기본 동작 방지
         if ('touches' in e.nativeEvent) {
-          e.preventDefault()
+          e.preventDefault() // 터치 시작 시점에서 기본 동작 방지
         }
+
         dragStartOffset.current = {
           x: coords.x - overlayPos.x,
           y: coords.y - overlayPos.y,
         }
+
         if ('touches' in e.nativeEvent) {
           if (longPressTimer.current) clearTimeout(longPressTimer.current)
           longPressTimer.current = setTimeout(() => {
@@ -213,7 +212,6 @@ export default function CanvasPreview({ image, overlay }: Props) {
           clearTimeout(longPressTimer.current)
           longPressTimer.current = null
         }
-        // 여기서 return (기본 스크롤 허용)
       }
     },
     [
@@ -228,14 +226,12 @@ export default function CanvasPreview({ image, overlay }: Props) {
 
   const handleInteractionMove = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
-      // *** 수정: isDragging 대신 touchStartedOnAsset ref 확인하여 preventDefault 호출 ***
+      // 터치 이벤트이고 에셋 위에서 시작된 경우 기본 동작 방지
       if ('touches' in e.nativeEvent && touchStartedOnAsset.current) {
-        // 터치가 에셋 위에서 시작되었다면, 드래그 상태(isDragging)와 관계없이
-        // touchmove 이벤트의 기본 스크롤 동작 방지
-        e.preventDefault()
+        e.preventDefault() // 터치 이동 중에도 기본 동작 방지
       }
 
-      // 드래그 중일 때만 위치 업데이트 (이전과 동일)
+      // 드래그 중이 아니거나 전체 에셋인 경우 위치 업데이트 안 함
       if (!isDragging || isFullAsset) return
 
       const coords = getCoords(e.nativeEvent)
@@ -247,7 +243,7 @@ export default function CanvasPreview({ image, overlay }: Props) {
       const canvas = canvasRef.current
       if (canvas) {
         const overlayDrawSize = scale * canvas.width * 0.3
-        const allowanceFactor = 0.25 // 허용 범위 (이전과 동일)
+        const allowanceFactor = 0.25 // 허용 범위
         const allowance = overlayDrawSize * allowanceFactor
         const minX = -allowance
         const minY = -allowance
@@ -258,12 +254,11 @@ export default function CanvasPreview({ image, overlay }: Props) {
       }
       setOverlayPos({ x: newX, y: newY })
     },
-    // 의존성 배열에서 touchStartedOnAsset는 ref이므로 추가할 필요 없음
     [isDragging, isFullAsset, getCoords, scale]
   )
 
   const handleInteractionEnd = useCallback(() => {
-    // *** 수정: 터치 종료 시 ref 초기화 ***
+    // 터치 종료 시 ref 초기화
     touchStartedOnAsset.current = false // 플래그 해제
 
     if (longPressTimer.current) {
@@ -274,7 +269,36 @@ export default function CanvasPreview({ image, overlay }: Props) {
       setIsDragging(false)
       document.body.style.overflowY = originalBodyOverflowY.current
     }
-  }, [isDragging]) // isDragging 의존성 유지
+  }, [isDragging])
+
+  // Canvas 요소에 대한 passive: false 설정을 위한 useEffect
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const touchStartHandler = (e: TouchEvent) => {
+      const coords = getCoords(e)
+      if (coords && isWithinOverlay(coords.x, coords.y)) {
+        e.preventDefault()
+      }
+    }
+
+    const touchMoveHandler = (e: TouchEvent) => {
+      if (touchStartedOnAsset.current || isDragging) {
+        e.preventDefault()
+      }
+    }
+
+    // passive: false로 이벤트 리스너 추가 (브라우저에게 preventDefault()를 호출할 수 있음을 알림)
+    canvas.addEventListener('touchstart', touchStartHandler, { passive: false })
+    canvas.addEventListener('touchmove', touchMoveHandler, { passive: false })
+
+    return () => {
+      canvas.removeEventListener('touchstart', touchStartHandler)
+      canvas.removeEventListener('touchmove', touchMoveHandler)
+    }
+  }, [getCoords, isWithinOverlay, isDragging])
+
   // --- Render ---
   return (
     <div className="mt-1 text-center select-none">
@@ -282,8 +306,7 @@ export default function CanvasPreview({ image, overlay }: Props) {
       <div className="mx-auto w-full max-w-[360px] overflow-hidden bg-gray-50 border border-gray-200 rounded-2xl shadow-sm px-4 py-5">
         {isMobile && !isFullAsset && (
           <p className="mb-2 text-xs text-gray-500">
-            {' '}
-            📍 에셋(1초)을 길게 누르면 이동할 수 있어요{' '}
+            📍 에셋(1초)을 길게 누르면 이동할 수 있어요
           </p>
         )}
 
@@ -301,7 +324,7 @@ export default function CanvasPreview({ image, overlay }: Props) {
             className={`block w-full max-w-full border border-gray-300 rounded bg-white ${
               isFullAsset ? 'cursor-default' : 'cursor-move'
             } transition-all duration-200 ease-out`}
-            // FIX 2: REMOVED touchAction style here. Control is now via preventDefault in JS.
+            style={{ touchAction: isFullAsset ? 'auto' : 'none' }} // 추가: touchAction 명시적 설정
           />
           {isDragging && (
             <div className="absolute inset-0 border-2 border-blue-500 pointer-events-none rounded opacity-75" />
@@ -333,16 +356,14 @@ export default function CanvasPreview({ image, overlay }: Props) {
               onClick={() => window.location.reload()}
               className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition cursor-pointer"
             >
-              {' '}
-              사진 다시 올리기{' '}
+              사진 다시 올리기
             </button>
             <a
               href={downloadUrl}
               download="campaign-image.png"
               className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition"
             >
-              {' '}
-              이미지 다운로드{' '}
+              이미지 다운로드
             </a>
           </div>
         )}
