@@ -85,12 +85,13 @@ export default function CanvasPreview({ image, overlay }: Props) {
     baseImage.src = image instanceof File ? URL.createObjectURL(image) : ''
   }, [image, overlay, overlayPos, scale, isFullAsset])
 
-  const getCoords = (e: MouseEvent | TouchEvent) => {
+  const getCoords = (e: MouseEvent | TouchEvent, canvas: HTMLCanvasElement) => {
+    const rect = canvas.getBoundingClientRect()
     const clientX =
       'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX
     const clientY =
       'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY
-    return { x: clientX, y: clientY }
+    return { x: clientX - rect.left, y: clientY - rect.top }
   }
 
   const isWithinOverlay = (x: number, y: number) => {
@@ -105,8 +106,10 @@ export default function CanvasPreview({ image, overlay }: Props) {
 
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
     if (isFullAsset) return
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-    const coords = getCoords(e.nativeEvent)
+    const coords = getCoords(e.nativeEvent, canvas)
     const within = isWithinOverlay(coords.x, coords.y)
     setAllowDrag(within)
     if (!within) return
@@ -129,11 +132,16 @@ export default function CanvasPreview({ image, overlay }: Props) {
 
   const handleMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (!allowDrag || !isDragging || isFullAsset) return
-    const coords = getCoords(e.nativeEvent)
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const coords = getCoords(e.nativeEvent, canvas)
     setOverlayPos({
       x: coords.x - dragStart.current.x,
       y: coords.y - dragStart.current.y,
     })
+
+    if ('touches' in e.nativeEvent) e.preventDefault()
   }
 
   const handleEnd = () => {
@@ -151,9 +159,9 @@ export default function CanvasPreview({ image, overlay }: Props) {
       <h2 className="text-base font-semibold mb-3">미리보기</h2>
 
       <div className="mx-auto w-full max-w-[360px] overflow-hidden bg-gray-50 border border-gray-200 rounded-2xl shadow-sm px-4 py-5">
-        {isMobile && (
+        {isMobile && !isFullAsset && (
           <p className="mb-2 text-xs text-gray-500">
-            📍 에셋을 길게 누르면 이동할 수 있어요
+            📍 에셋(1초)을 길게 누르면 이동할 수 있어요
           </p>
         )}
 
