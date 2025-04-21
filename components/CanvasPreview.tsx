@@ -23,7 +23,6 @@ export default function CanvasPreview({ image, overlay }: Props) {
   const isFullAsset = ['asset08.png', 'asset09.png', 'asset10.png'].includes(
     overlay
   )
-
   const isMobile =
     typeof window !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent)
 
@@ -43,7 +42,6 @@ export default function CanvasPreview({ image, overlay }: Props) {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const displaySize = 360
     const exportSize = 720
 
     const baseImage = new Image()
@@ -53,8 +51,8 @@ export default function CanvasPreview({ image, overlay }: Props) {
       overlayImg.onload = () => {
         canvas.width = exportSize
         canvas.height = exportSize
-        canvas.style.width = `${displaySize}px`
-        canvas.style.height = `${displaySize}px`
+        canvas.style.width = '100%'
+        canvas.style.height = 'auto'
 
         ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -156,7 +154,8 @@ export default function CanvasPreview({ image, overlay }: Props) {
         )}
 
         <div
-          className="relative touch-none w-full max-w-[320px] mx-auto"
+          className="relative w-full max-w-[320px] mx-auto"
+          style={{ touchAction: isDragging ? 'none' : 'pan-y' }}
           onMouseDown={handleStart}
           onMouseMove={handleMove}
           onMouseUp={handleEnd}
@@ -168,7 +167,7 @@ export default function CanvasPreview({ image, overlay }: Props) {
         >
           <canvas
             ref={canvasRef}
-            className={`mx-auto border border-gray-300 rounded bg-white ${
+            className={`w-full max-w-full border border-gray-300 rounded bg-white ${
               isFullAsset ? 'cursor-default' : 'cursor-move'
             } transition-all duration-200 ease-out`}
           />
@@ -195,7 +194,7 @@ export default function CanvasPreview({ image, overlay }: Props) {
               onClick={() => window.location.reload()}
               className="block w-full text-center px-4 py-2 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition cursor-pointer"
             >
-              📤 사진 다시 올리기
+              사진 다시 올리기
             </a>
             <a
               href={downloadUrl}
