@@ -13,8 +13,9 @@ export default function CanvasPreview({ image, overlay }: Props) {
     overlay === 'asset01.png' ? 1.8 : 1
   )
   const [isDragging, setIsDragging] = useState(false)
-  const [touchReady, setTouchReady] = useState(false)
+  // const [touchReady, setTouchReady] = useState(false)
   const [showMobileHint, setShowMobileHint] = useState(false)
+  const [allowDrag, setAllowDrag] = useState(false)
 
   const dragStart = useRef({ x: 0, y: 0 })
   const longPressTimer = useRef<NodeJS.Timeout | null>(null)
@@ -108,12 +109,12 @@ export default function CanvasPreview({ image, overlay }: Props) {
     if (isFullAsset) return
 
     const coords = getCoords(e.nativeEvent)
-    if (!isWithinOverlay(coords.x, coords.y)) return
+    const within = isWithinOverlay(coords.x, coords.y)
+    setAllowDrag(within)
+    if (!within) return
 
     if ('touches' in e.nativeEvent) {
-      setTouchReady(false)
       longPressTimer.current = setTimeout(() => {
-        setTouchReady(true)
         setIsDragging(true)
       }, 500)
     } else {
@@ -127,7 +128,7 @@ export default function CanvasPreview({ image, overlay }: Props) {
   }
 
   const handleMove = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDragging || isFullAsset) return
+    if (!allowDrag || !isDragging || isFullAsset) return
     const coords = getCoords(e.nativeEvent)
     setOverlayPos({
       x: coords.x - dragStart.current.x,
@@ -140,8 +141,8 @@ export default function CanvasPreview({ image, overlay }: Props) {
       clearTimeout(longPressTimer.current)
       longPressTimer.current = null
     }
-    if (!touchReady) setIsDragging(false)
-    setTouchReady(false)
+    setIsDragging(false)
+    setAllowDrag(false)
   }
 
   useEffect(() => {
