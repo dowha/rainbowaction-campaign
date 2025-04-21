@@ -310,6 +310,8 @@ export default function CanvasPreview({ image, overlay }: Props) {
               value={scale}
               onChange={(e) => setScale(parseFloat(e.target.value))}
               className="w-full h-6 accent-blue-600 touch-none cursor-pointer"
+              onTouchStart={(e) => e.stopPropagation()} // 캔버스와의 이벤트 충돌 방지 (필요 시)
+              onTouchEnd={(e) => e.stopPropagation()} // 캔버스와의 이벤트 충돌 방지 (필요 시)
             />
           </div>
         )}
