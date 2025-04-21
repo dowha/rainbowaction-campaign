@@ -13,8 +13,6 @@ export default function CanvasPreview({ image, overlay }: Props) {
     overlay === 'asset01.png' ? 1.8 : 1
   )
   const [isDragging, setIsDragging] = useState(false)
-  // const [touchReady, setTouchReady] = useState(false)
-  const [showMobileHint, setShowMobileHint] = useState(false)
   const [allowDrag, setAllowDrag] = useState(false)
 
   const dragStart = useRef({ x: 0, y: 0 })
@@ -116,9 +114,11 @@ export default function CanvasPreview({ image, overlay }: Props) {
     if ('touches' in e.nativeEvent) {
       longPressTimer.current = setTimeout(() => {
         setIsDragging(true)
+        document.body.style.overflow = 'hidden'
       }, 500)
     } else {
       setIsDragging(true)
+      document.body.style.overflow = 'hidden'
     }
 
     dragStart.current = {
@@ -143,25 +143,17 @@ export default function CanvasPreview({ image, overlay }: Props) {
     }
     setIsDragging(false)
     setAllowDrag(false)
+    document.body.style.overflow = ''
   }
-
-  useEffect(() => {
-    if (isMobile) {
-      setShowMobileHint(true)
-      const t = setTimeout(() => setShowMobileHint(false), 2500)
-      return () => clearTimeout(t)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   return (
     <div className="mt-1 text-center select-none">
       <h2 className="text-base font-semibold mb-3">미리보기</h2>
 
       <div className="mx-auto w-full max-w-[360px] overflow-hidden bg-gray-50 border border-gray-200 rounded-2xl shadow-sm px-4 py-5">
-        {showMobileHint && (
-          <p className="mb-2 text-xs text-gray-500 animate-pulse">
-            📍 길게 누르면 에셋을 이동할 수 있어요
+        {isMobile && (
+          <p className="mb-2 text-xs text-gray-500">
+            📍 에셋을 길게 누르면 이동할 수 있어요
           </p>
         )}
 
