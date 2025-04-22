@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 
 interface Props {
@@ -381,6 +381,60 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
     }
   }, [downloadUrl, overlay])
 
+  const platformInfo = useMemo(() => {
+    // 서버 사이드 렌더링 또는 window/navigator 없는 환경 방어
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return { isPC: true, isIOS: false, isAndroid: false, canShare: false }
+    }
+
+    const userAgent = navigator.userAgent
+    const platform = navigator.platform
+    const maxTouchPoints = navigator.maxTouchPoints || 0
+
+    // 최신 iPad는 Mac으로 UserAgent를 보낼 수 있으므로 maxTouchPoints도 확인
+    const isIOS =
+      /iPhone|iPad|iPod/i.test(userAgent) ||
+      (platform === 'MacIntel' && maxTouchPoints > 1) // MSStream 조건 제거
+
+    const isAndroid = /Android/i.test(userAgent)
+    const isMobile = isIOS || isAndroid
+    const isPC = !isMobile
+    const canShare = !!navigator.share
+
+    return {
+      isPC,
+      isIOS,
+      isAndroid,
+      isMobile, // 편의상 모바일 전체 여부도 추가
+      canShare,
+    }
+  }, []) // 빈 배열: 컴포넌트 마운트 시 한 번만 실행
+
+  const ShareButton = ({ text }: { text: string }) => (
+    <button
+      type="button"
+      onClick={handleNativeShare}
+      disabled={isSharing}
+      className="block no-underline hover:no-underline w-full text-center px-4 py-2.5 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition border border-blue-600 disabled:opacity-60 disabled:cursor-wait"
+    >
+      {isSharing ? '공유 준비 중...' : text}
+    </button>
+  )
+
+  const DownloadButton = () => (
+    <a
+      href={downloadUrl!} // downloadUrl이 있을 때만 렌더링되므로 ! 사용 가능 (또는 조건부 렌더링 확인)
+      download="rainbowaction-profile.png"
+      onClick={onDownload}
+      className={`block no-underline hover:no-underline w-full text-center px-4 py-2.5 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition border border-gray-800 ${
+        isSharing ? 'opacity-60 pointer-events-none' : 'cursor-pointer'
+      }`}
+      aria-disabled={isSharing}
+    >
+      이미지 다운로드
+    </a>
+  )
+
   // --- Render ---
   return (
     <div className="mt-1 text-center select-none">
@@ -470,25 +524,38 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
         {downloadUrl && (
           <div className="mt-5 space-y-3">
             <hr />
-            <a
-              href={downloadUrl}
-              download="rainbowaction-profile.png"
-              onClick={onDownload}
-              className={`block no-underline hover:no-underline w-full text-center px-4 py-2.5 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition border border-gray-800 ${
-                isSharing ? 'opacity-60 pointer-events-none' : 'cursor-pointer'
-              }`}
-              aria-disabled={isSharing}
-            >
-              이미지 다운로드
-            </a>
-            <button
-              type="button"
-              onClick={handleNativeShare}
-              disabled={isSharing}
-              className="block no-underline hover:no-underline w-full text-center px-4 py-2.5 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition border border-blue-600 disabled:opacity-60 disabled:cursor-wait" // Added disabled style
-            >
-              {isSharing ? '공유 준비 중...' : '공유하기'}
-            </button>
+
+            {/* PC 환경 렌더링 */}
+            {platformInfo.isPC && (
+              <>
+                <DownloadButton />
+                {/* PC에서도 공유 기능 지원 시 버튼 노출 */}
+                {platformInfo.canShare && <ShareButton text="공유하기" />}
+              </>
+            )}
+
+            {/* iOS 모바일 환경 렌더링 */}
+            {platformInfo.isIOS && (
+              <>
+                {/* iOS는 공유가 핵심이므로 공유 버튼 먼저 (사진첩 저장 안내 포함) */}
+                {platformInfo.canShare && (
+                  <ShareButton text="공유하기(사진첩 저장하기)" />
+                )}
+                {/* iOS에서도 파일 다운로드 옵션 제공 */}
+                <DownloadButton />
+              </>
+            )}
+
+            {/* Android 모바일 환경 렌더링 */}
+            {platformInfo.isAndroid && (
+              <>
+                {/* Android는 다운로드를 우선 노출 (요청 기준) */}
+                <DownloadButton />
+                {/* Android 공유 버튼 */}
+                {platformInfo.canShare && <ShareButton text="공유하기" />}
+              </>
+            )}
+
             <hr />
             <button
               type="button"

@@ -12,7 +12,13 @@ export default function Home() {
   const [overlayFile, setOverlayFile] = useState('asset01.png')
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    const timeout = setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'instant' }) // 'instant'는 일부 브라우저에서 무시될 수 있음
+      document.documentElement.scrollTop = 0
+      document.body.scrollTop = 0
+    }, 100)
+
+    return () => clearTimeout(timeout)
   }, [step])
 
   return (
@@ -90,7 +96,9 @@ export default function Home() {
                 <strong>후원계좌</strong>
               </span>
               <br />
-              국민은행 408801-01-317159 성소수자차별반대 무지개행동
+              <a href="https://aq.gy/f/2K1E%5E" target="_blank" rel="noopener">
+                국민은행 408801-01-317159 성소수자차별반대 무지개행동
+              </a>
             </p>
 
             <p className="pb-1 text-sm text-black">
