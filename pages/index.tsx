@@ -89,9 +89,25 @@ export default function Home() {
         </main>
 
         {/* 고정 푸터 */}
+
         <footer className="w-full z-40 bg-gray-100">
-          <div className="max-w-[420px] mx-auto bg-white text-center py-4 px-4 border-t text-sm text-gray-400">
-            <p className="pb-1 text-black">
+          <div className="max-w-[420px] mx-auto bg-white text-center text-sm text-gray-400">
+            {/* 캠페인 메인 안내 배너 */}
+            <div className="w-full bg-[#F1F5FF] text-blue-800 leading-tight text-center py-4 px-4 border-y border-blue-200 font-medium tracking-tight">
+              전체 캠페인 정보는{' '}
+              <a
+                href="https://rainbowaction.kr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2"
+              >
+                무지개 수호대 페이지
+              </a>
+              에서 확인하실 수 있어요.
+            </div>
+
+            {/* 기존 정보 영역 */}
+            <p className="pt-4 pb-1 text-black">
               <span className="text-[#2A559B]">
                 <strong>후원계좌</strong>
               </span>
@@ -111,7 +127,7 @@ export default function Home() {
               </a>
               .
             </p>
-            <p className="text-xs">
+            <p className="text-xs pb-4">
               Made with ♥ by{' '}
               <a
                 href="https://dowha.kim"
