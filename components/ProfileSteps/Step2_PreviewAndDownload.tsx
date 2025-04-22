@@ -53,6 +53,19 @@ export default function Step2_PreviewAndDownload({
     logFinal()
   }, [overlayFile, downloaded])
 
+  const handleDownloadLog = async () => {
+    try {
+      await supabase.from('image_creations').insert({
+        asset: overlayFile,
+        anonymous_id: localStorage.getItem('anonymous_id'),
+        user_agent: navigator.userAgent,
+        stage: 'downloaded',
+      })
+    } catch (err) {
+      console.error('다운로드 기록 실패:', err)
+    }
+  }
+
   return (
     <div className="w-full">
       {/* 에셋 선택 가로 스크롤 */}
@@ -91,7 +104,11 @@ export default function Step2_PreviewAndDownload({
 
       {/* 이미지 미리보기 */}
       <div className="max-w-md mx-auto mt-6">
-        <CanvasPreview image={image} overlay={overlayFile} />
+        <CanvasPreview
+          image={image}
+          overlay={overlayFile}
+          onDownload={handleDownloadLog}
+        />
         <p className="text-center text-xs text-gray-400 mt-6">
           🔒 이미지는 브라우저에서만 처리되며, 서버에 저장되지 않습니다.
         </p>

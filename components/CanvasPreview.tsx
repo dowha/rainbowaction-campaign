@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react'
 interface Props {
   image: File
   overlay: string
+  onDownload?: () => void // ✅ prop 추가
 }
 // --- Helper functions (outside component) ---
 const getInitialPos = (overlay: string): { x: number; y: number } => {
@@ -20,7 +21,7 @@ const isFullAssetOverlay = (overlay: string): boolean => {
 }
 // ---
 
-export default function CanvasPreview({ image, overlay }: Props) {
+export default function CanvasPreview({ image, overlay, onDownload }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
   const [overlayPos, setOverlayPos] = useState(() => getInitialPos(overlay))
@@ -367,6 +368,9 @@ export default function CanvasPreview({ image, overlay }: Props) {
             <a
               href={downloadUrl}
               download="campaign-image.png"
+              onClick={() => {
+                onDownload?.() // ✅ 콜백 실행
+              }}
               className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition"
             >
               이미지 다운로드
