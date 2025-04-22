@@ -46,7 +46,7 @@ export default function Step1_UploadAndSelect({
       asset: overlayFile,
       anonymous_id: localStorage.getItem('anonymous_id'),
       user_agent: navigator.userAgent,
-      stage: 'started',
+      stage: 'selected',
     })
     onNext()
   }

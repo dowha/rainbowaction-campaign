@@ -21,12 +21,14 @@ type Props = {
   image: File
   overlayFile: string
   setOverlayFile: (file: string) => void
+  onReset: () => void // 👈 추가
 }
 
 export default function Step2_PreviewAndDownload({
   image,
   overlayFile,
   setOverlayFile,
+  onReset,
 }: Props) {
   const handleDownloadLog = async () => {
     try {
@@ -105,6 +107,7 @@ export default function Step2_PreviewAndDownload({
           image={image}
           overlay={overlayFile}
           onDownload={handleDownloadLog}
+          onReset={onReset}
         />
       </div>
     </div>

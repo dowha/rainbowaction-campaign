@@ -204,11 +204,7 @@ export default function Uploader({ onSelect, onClear }: Props) {
               정사각형 비율로 촬영된 사진이 가장 잘 어울립니다.
             </p>
           </div>
-          {!uploadedFileName && (
-            <p className="text-xs text-green-800 mt-6 px-4 py-3 border border-green-300 bg-green-50 rounded-2xl text-center">
-              🔒 이미지는 브라우저에서만 처리되며, 서버에 저장되지 않습니다.
-            </p>
-          )}
+
           {uploadedFileName && (
             <div className="mt-3 text-xs text-gray-700 text-center">
               {uploadedPreview && (
@@ -368,12 +364,7 @@ export default function Uploader({ onSelect, onClear }: Props) {
               </div>
             </div>
           </div>
-          {/* 서버 저장 안 됨 안내 (캡처 전이고 에러 없을 때) */}
-          {!captured && !cameraError && (
-            <p className="text-xs text-green-800 mt-6 px-4 py-3 border border-green-300 bg-green-50 rounded-2xl text-center">
-              🔒 이미지는 브라우저에서만 처리되며, 서버에 저장되지 않습니다.
-            </p>
-          )}
+
           <canvas ref={canvasRef} className="hidden" />
         </>
       )}

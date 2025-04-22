@@ -5,6 +5,7 @@ interface Props {
   image: File
   overlay: string
   onDownload?: () => void
+  onReset?: () => void
 }
 
 // --- Helper functions (outside component) ---
@@ -18,7 +19,12 @@ const isFullAssetOverlay = (overlay: string): boolean => {
 }
 // ---
 
-export default function CanvasPreview({ image, overlay, onDownload }: Props) {
+export default function CanvasPreview({
+  image,
+  overlay,
+  onDownload,
+  onReset,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
   const [overlayPos, setOverlayPos] = useState(() => getInitialPos(overlay))
@@ -559,7 +565,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
             <hr />
             <button
               type="button"
-              onClick={() => window.location.reload()}
+              onClick={onReset}
               className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition cursor-pointer disabled:opacity-60 disabled:pointer-events-none"
               disabled={isSharing}
             >

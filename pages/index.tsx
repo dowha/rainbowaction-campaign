@@ -5,11 +5,18 @@ import Head from 'next/head'
 import Image from 'next/image'
 import Step1_UploadAndSelect from '@/components/ProfileSteps/Step1_UploadAndSelect'
 import Step2_PreviewAndDownload from '@/components/ProfileSteps/Step2_PreviewAndDownload'
+import { supabase } from '@/lib/supabase'
 
 export default function Home() {
-  const [step, setStep] = useState<1 | 2>(1)
+  const [step, setStep] = useState<0 | 1 | 2>(0)
   const [image, setImage] = useState<File | null>(null)
   const [overlayFile, setOverlayFile] = useState('asset01.png')
+
+  useEffect(() => {
+    if (!localStorage.getItem('anonymous_id')) {
+      localStorage.setItem('anonymous_id', crypto.randomUUID())
+    }
+  }, [])
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -27,12 +34,12 @@ export default function Home() {
         <title>수호동지 프로필 꾸미기</title>
         <meta
           name="description"
-          content="나만의 무지개수호대 프로필 이미지를 만들어보세요!"
+          content="무지개 아이템으로 수호동지 프로필 사진을 꾸며보세요!"
         />
         <meta property="og:title" content="수호동지 프로필 꾸미기" />
         <meta
           property="og:description"
-          content="성소수자차별반대 무지개행동의 무지개 프로필 캠페인에 참여해보세요."
+          content="무지개 아이템으로 수호동지 프로필 사진을 꾸며보세요!"
         />
         <meta
           property="og:image"
@@ -43,7 +50,7 @@ export default function Home() {
         <meta name="twitter:title" content="수호동지 프로필 꾸미기" />
         <meta
           name="twitter:description"
-          content="나만의 무지개수호대 프로필 이미지를 만들어보세요!"
+          content="무지개 아이템으로 수호동지 프로필 사진을 꾸며보세요!"
         />
         <meta
           name="twitter:image"
@@ -63,7 +70,7 @@ export default function Home() {
               onClick={() => {
                 setImage(null)
                 setOverlayFile('asset01.png')
-                setStep(1)
+                setStep(0)
               }}
             />
           </div>
@@ -71,7 +78,43 @@ export default function Home() {
 
         {/* 본문 */}
         <main className="w-full max-w-[420px] mx-auto px-4 pt-[100px] pb-[20px] bg-white">
-          {step === 1 || !image ? (
+          {step === 0 ? (
+            <div className="text-center space-y-6">
+              <div className="bg-white border border-[#84C0D3] rounded-2xl px-6 py-8">
+                <h1 className="text-xl font-bold text-[#415E9A] mb-2 ">
+                  수호동지 프로필 꾸미기!
+                </h1>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  프로필 사진에 무지개 아이템을 추가해
+                  <br />
+                  성소수자에 대한 지지를 표현해주세요!
+                </p>
+                <button
+                  onClick={async () => {
+                    try {
+                      await supabase.from('image_creations').insert({
+                        stage: 'started',
+                        anonymous_id: localStorage.getItem('anonymous_id'),
+                        user_agent: navigator.userAgent,
+                      })
+                    } catch (err) {
+                      console.error('Supabase 기록 실패:', err)
+                    } finally {
+                      setStep(1)
+                    }
+                  }}
+                  className="mt-6 px-5 py-2 text-white text-sm bg-[rgba(225,168,189,0.9)]
+ rounded-full hover:bg-[rgba(225,168,189,1)]  transition"
+                >
+                  <strong>시작하기</strong>
+                </button>
+              </div>
+
+              <p className="text-xs text-green-800 px-4 py-3 border border-green-300 bg-green-50 rounded-2xl">
+                🔒 이미지는 브라우저에서만 처리되며, 서버에 저장되지 않습니다.
+              </p>
+            </div>
+          ) : step === 1 || !image ? (
             <Step1_UploadAndSelect
               image={image}
               setImage={setImage}
@@ -84,6 +127,11 @@ export default function Home() {
               image={image!}
               overlayFile={overlayFile}
               setOverlayFile={setOverlayFile}
+              onReset={() => {
+                setImage(null)
+                setOverlayFile('asset01.png')
+                setStep(1)
+              }}
             />
           )}
         </main>
@@ -93,7 +141,7 @@ export default function Home() {
         <footer className="w-full z-40 bg-gray-100">
           <div className="max-w-[420px] mx-auto bg-white text-center text-sm text-gray-400">
             {/* 캠페인 메인 안내 배너 */}
-            <div className="w-full bg-[#F1F5FF] text-blue-800 leading-tight text-center py-4 px-4 border-y border-blue-200 font-medium tracking-tight">
+            <div className="w-full bg-[#F1F5FF] text-[#415E9A] leading-tight text-center py-4 px-4 border-y border-[#84C0D3] font-medium tracking-tight">
               전체 캠페인 정보는{' '}
               <a
                 href="https://rainbowaction.kr"
