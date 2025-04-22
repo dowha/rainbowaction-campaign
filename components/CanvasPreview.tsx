@@ -24,6 +24,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
   const [scale, setScale] = useState<number>(1.8) // ← getInitialScale 제거하고 고정
   const [rotation, setRotation] = useState<number>(0) // ✅ 회전 상태 추가 (단위: 도)
   const [isDragging, setIsDragging] = useState(false)
+  const [isSharing, setIsSharing] = useState(false) // State to track sharing process
 
   const dragStartOffset = useRef({ x: 0, y: 0 })
   const longPressTimer = useRef<NodeJS.Timeout | null>(null)
@@ -237,11 +238,6 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
 
   const handleInteractionMove = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
-      // passive: false 리스너에서 처리하므로 주석 처리
-      // if ('touches' in e.nativeEvent && touchStartedOnAsset.current) {
-      //   e.preventDefault();
-      // }
-
       if (!isDragging || isFullAsset) return
 
       const coords = getCoords(e.nativeEvent)
@@ -321,6 +317,84 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
     setRotation((prev) => (prev + degreeDelta + 360) % 360) // 0~359도 유지
   }, [])
 
+  // Helper function to convert Data URL to Blob
+  const dataURLtoBlob = (dataurl: string): Blob | null => {
+    try {
+      const arr = dataurl.split(',')
+      if (!arr[0]) return null
+      const match = arr[0].match(/:(.*?);/)
+      if (!match) return null
+      const mime = match[1]
+      const bstr = atob(arr[arr.length - 1]) // Use arr.length - 1 for robustness
+      let n = bstr.length
+      const u8arr = new Uint8Array(n)
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n)
+      }
+      return new Blob([u8arr], { type: mime })
+    } catch (e) {
+      console.error('Error converting data URL to Blob:', e)
+      return null
+    }
+  }
+  // Native Share Handler
+  const handleNativeShare = useCallback(async () => {
+    if (!downloadUrl) {
+      alert('이미지를 생성 중이거나 오류가 발생했습니다.')
+      return
+    }
+
+    // Check if Web Share API is supported
+    if (!navigator.share) {
+      alert(
+        '이 브라우저/기기에서는 공유 기능을 지원하지 않습니다. 이미지를 다운로드하여 공유해주세요.'
+      )
+      return
+    }
+
+    setIsSharing(true) // Indicate sharing process start
+
+    const blob = dataURLtoBlob(downloadUrl)
+    if (!blob) {
+      alert('이미지 변환 중 오류가 발생했습니다.')
+      setIsSharing(false)
+      return
+    }
+
+    const file = new File([blob], 'campaign-image.png', { type: 'image/png' })
+    const shareData = {
+      files: [file],
+      title: '캠페인 이미지', // Optional: Customize title
+      text: '캠페인 참여 이미지를 공유합니다!', // Optional: Customize text
+      // url: 'https://your-campaign-url.com' // Optional: Add a link
+    }
+
+    try {
+      // Check if the data can be shared (optional but recommended)
+      if (navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData)
+        console.log('이미지 공유 성공')
+      } else if (!navigator.canShare) {
+        // If canShare isn't supported, just try sharing directly
+        await navigator.share(shareData)
+        console.log('이미지 공유 성공 (canShare not supported)')
+      } else {
+        // Fallback if canShare returns false
+        alert(
+          '이 이미지 파일은 공유할 수 없습니다. 다운로드 후 직접 공유해주세요.'
+        )
+      }
+    } catch (error) {
+      console.error('이미지 공유 실패:', error)
+      // Don't alert on AbortError (user cancellation)
+      if (error instanceof Error && error.name !== 'AbortError') {
+        alert(`공유 중 오류가 발생했습니다: ${error.message}`)
+      }
+    } finally {
+      setIsSharing(false) // Indicate sharing process end regardless of outcome
+    }
+  }, [downloadUrl]) // Dependency: downloadUrl
+
   // --- Render ---
   return (
     <div className="mt-1 text-center select-none">
@@ -328,7 +402,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
       <div className="mx-auto w-full max-w-[360px] overflow-hidden bg-gray-50 border border-gray-200 rounded-2xl shadow-sm px-4 py-5">
         {isMobile && !isFullAsset && (
           <p className="mb-2 text-xs text-gray-500">
-            📍 에셋(1초)을 길게 누르면 이동할 수 있어요
+            📍 에셋을 길게(1초) 누르면 이동할 수 있어요!
           </p>
         )}
 
@@ -356,9 +430,6 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
 
         {!isFullAsset && (
           <div className="mt-4 space-y-3">
-            {' '}
-            {/* ✅ 간격 조절을 위해 space-y 추가 */}
-            {/* --- 크기 조절 --- */}
             <div className="flex flex-col items-center gap-1">
               <label htmlFor="scale-slider" className="text-sm text-gray-600">
                 크기 조절
@@ -376,15 +447,13 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
             </div>
             {/* --- 회전 조절 --- */}
             <div className="flex flex-col items-center gap-2">
-              {' '}
               {/* ✅ gap 추가 */}
               <span className="text-sm text-gray-600">이미지 회전</span>
               <div className="flex justify-center gap-3">
-                {' '}
                 {/* ✅ 버튼 간격 */}
                 <button
                   type="button"
-                  onClick={() => handleRotate(-15)} // 15도씩 회전
+                  onClick={() => handleRotate(-10)}
                   className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
                   aria-label="왼쪽으로 회전"
                 >
@@ -392,7 +461,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleRotate(15)} // 15도씩 회전
+                  onClick={() => handleRotate(10)}
                   className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
                   aria-label="오른쪽으로 회전"
                 >
@@ -419,6 +488,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
               type="button"
               onClick={() => window.location.reload()}
               className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition cursor-pointer"
+              disabled={isSharing}
             >
               사진 다시 고르기
             </button>
@@ -426,10 +496,21 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
               href={downloadUrl}
               download="campaign-image.png"
               onClick={onDownload}
-              className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition border border-gray-800" // border border-gray-800 추가
+              className={`block no-underline hover:no-underline w-full text-center px-4 py-2.5 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition border border-gray-800 ${
+                isSharing ? 'opacity-60 pointer-events-none' : 'cursor-pointer'
+              }`}
+              aria-disabled={isSharing}
             >
               이미지 다운로드
             </a>
+            <button
+              type="button"
+              onClick={handleNativeShare}
+              disabled={isSharing} // Disable button while sharing
+              className="block no-underline hover:no-underline w-full text-center px-4 py-2.5 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition border border-blue-600 disabled:opacity-60 disabled:cursor-wait" // Added disabled style
+            >
+              {isSharing ? '공유 준비 중...' : '공유하기'}
+            </button>
           </div>
         )}
       </div>

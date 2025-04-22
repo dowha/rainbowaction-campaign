@@ -19,7 +19,6 @@ body {
 
 /* ✅ 링크 스타일 개선 */
 a {
-  color: #2563eb; /* Tailwind blue-600 값 */
   text-decoration: underline;
   cursor: pointer;
 }
@@ -28,11 +27,31 @@ a:hover {
   text-decoration: underline;
 }
 
-/* globals.css 또는 tailwind.css에 */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+/* Webkit 기반 브라우저 (Chrome, Safari, Edge 등) */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px; /* 가로 스크롤바 높이 줄이기 (예: 8px -> 6px) */
+  /* width: 6px; */ /* 세로 스크롤바 너비 (필요하다면 동일하게 조절) */
 }
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background-color: #f1f1f1; /* 스크롤바 트랙 배경색 (연한 회색 유지 또는 더 연하게) */
+  border-radius: 10px; /* 트랙 모서리 둥글게 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #d1d5db; /* 스크롤바 핸들 색상 (기존 #c1c1c1 보다 조금 더 연한 회색, Tailwind gray-300과 유사) */
+  border-radius: 10px; /* 핸들 모서리 둥글게 */
+  /* 핸들 주위에 약간의 여백 효과를 주는 테두리 (트랙 색상과 동일하게) */
+  /* border: 1px solid #f1f1f1; */ /* 테두리를 얇게 하거나 없애면 더 얇아 보임 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af; /* 마우스 호버 시 핸들 색상 (Tailwind gray-400과 유사) */
+}
+
+/* Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin; /* Firefox 스크롤바를 '얇게' 설정 (이미 적용되어 있을 수 있음) */
+  /* Firefox 스크롤바 색상 (핸들색 트랙색) - 위 Webkit 색상과 유사하게 조정 */
+  scrollbar-color: #d1d5db #f1f1f1;
 }

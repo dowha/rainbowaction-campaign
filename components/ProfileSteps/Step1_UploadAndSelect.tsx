@@ -78,7 +78,7 @@ export default function Step1_UploadAndSelect({
                   className={`relative w-full h-28 rounded-xl border p-1 text-xs font-medium flex flex-col items-center justify-between text-center transition overflow-hidden ${
                     // overflow-hidden 추가 (선택 사항)
                     selected
-                      ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
+                      ? 'border-blue-500 bg-blue-50 text-gray-700 shadow-sm'
                       : 'bg-white border-gray-300 hover:bg-gray-100 text-gray-700'
                   }`}
                 >

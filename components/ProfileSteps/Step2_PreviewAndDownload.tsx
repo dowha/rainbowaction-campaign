@@ -1,7 +1,6 @@
 'use client'
 
 import CanvasPreview from '@/components/CanvasPreview'
-import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Image from 'next/image'
 
@@ -29,30 +28,6 @@ export default function Step2_PreviewAndDownload({
   overlayFile,
   setOverlayFile,
 }: Props) {
-  const [downloaded, setDownloaded] = useState(false)
-
-  useEffect(() => {
-    const alreadyLogged = sessionStorage.getItem('final-logged')
-    if (alreadyLogged || downloaded) return
-
-    const logFinal = async () => {
-      try {
-        await supabase.from('image_creations').insert({
-          asset: overlayFile,
-          anonymous_id: localStorage.getItem('anonymous_id'),
-          user_agent: navigator.userAgent,
-          stage: 'final',
-        })
-        sessionStorage.setItem('final-logged', 'true')
-        setDownloaded(true)
-      } catch (err) {
-        console.error('최종 기록 실패:', err)
-      }
-    }
-
-    logFinal()
-  }, [overlayFile, downloaded])
-
   const handleDownloadLog = async () => {
     try {
       await supabase.from('image_creations').insert({
