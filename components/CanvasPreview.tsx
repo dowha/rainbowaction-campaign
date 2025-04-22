@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
+import { supabase } from '@/lib/supabase'
 
 interface Props {
   image: File
@@ -21,10 +22,10 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
   const [overlayPos, setOverlayPos] = useState(() => getInitialPos(overlay))
-  const [scale, setScale] = useState<number>(1.8) // ← getInitialScale 제거하고 고정
-  const [rotation, setRotation] = useState<number>(0) // ✅ 회전 상태 추가 (단위: 도)
+  const [scale, setScale] = useState<number>(1.8)
+  const [rotation, setRotation] = useState<number>(0)
   const [isDragging, setIsDragging] = useState(false)
-  const [isSharing, setIsSharing] = useState(false) // State to track sharing process
+  const [isSharing, setIsSharing] = useState(false)
 
   const dragStartOffset = useRef({ x: 0, y: 0 })
   const longPressTimer = useRef<NodeJS.Timeout | null>(null)
@@ -37,7 +38,6 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
   const isMobile =
     typeof window !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent)
 
-  // --- Canvas Drawing Effect ---
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || !image) return
@@ -60,7 +60,6 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
         canvas.height = exportSize
         ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-        // Draw Base Image (Cropped to Square)
         const shortSide = Math.min(baseImage.width, baseImage.height)
         const sx = (baseImage.width - shortSide) / 2
         const sy = (baseImage.height - shortSide) / 2
@@ -76,7 +75,6 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
           exportSize
         )
 
-        // Draw Overlay Image
         if (isFullAsset) {
           ctx.drawImage(overlayImg, 0, 0, exportSize, exportSize)
         } else {
@@ -84,17 +82,17 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
           const centerX = overlayPos.x + overlayDrawSize / 2
           const centerY = overlayPos.y + overlayDrawSize / 2
 
-          ctx.save() // ✅ 현재 캔버스 상태 저장
-          ctx.translate(centerX, centerY) // ✅ 캔버스 원점을 에셋 중심으로 이동
-          ctx.rotate((rotation * Math.PI) / 180) // ✅ 회전 적용 (라디안 단위)
+          ctx.save()
+          ctx.translate(centerX, centerY)
+          ctx.rotate((rotation * Math.PI) / 180)
           ctx.drawImage(
             overlayImg,
-            -overlayDrawSize / 2, // ✅ 이동된 원점 기준으로 이미지 그리기 (중앙 정렬)
+            -overlayDrawSize / 2,
             -overlayDrawSize / 2,
             overlayDrawSize,
             overlayDrawSize
           )
-          ctx.restore() // ✅ 이전 캔버스 상태 복원 (translate, rotate 해제)
+          ctx.restore()
         }
         setDownloadUrl(canvas.toDataURL('image/png'))
       }
@@ -132,16 +130,14 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
         clearTimeout(longPressTimer.current)
       }
       if (
-        isMobile && // 모바일에서만 복원 로직 실행
+        isMobile &&
         document.body.style.overflowY !== originalBodyOverflowY.current
       ) {
         document.body.style.overflowY = originalBodyOverflowY.current
       }
     }
-    // ✅ rotation을 의존성 배열에 추가
-  }, [image, overlay, overlayPos, scale, rotation, isFullAsset, isMobile]) // isMobile 추가
+  }, [image, overlay, overlayPos, scale, rotation, isFullAsset, isMobile])
 
-  // --- Interaction Helper Functions ---
   const getCoords = useCallback(
     (e: MouseEvent | TouchEvent): { x: number; y: number } | null => {
       const canvas = canvasRef.current
@@ -162,8 +158,6 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
     []
   )
 
-  // isWithinOverlay는 회전을 고려하지 않은 원래의 사각형 영역을 기준으로 합니다.
-  // 드래그 시작 판정에는 이 방식이 더 직관적일 수 있습니다.
   const isWithinOverlay = useCallback(
     (x: number, y: number): boolean => {
       if (isFullAsset) return false
@@ -180,7 +174,6 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
     [scale, overlayPos.x, overlayPos.y, isFullAsset]
   )
 
-  // --- Start Drag Action ---
   const startDragging = useCallback(() => {
     if (!isDragging) {
       setIsDragging(true)
@@ -191,7 +184,6 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
     }
   }, [isDragging, isMobile])
 
-  // --- Event Handlers ---
   const handleInteractionStart = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
       if (isFullAsset) return
@@ -201,7 +193,6 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
         touchStartedOnAsset.current = true
 
         if ('touches' in e.nativeEvent) {
-          // e.preventDefault(); // passive: false 리스너에서 처리하도록 주석 처리
         }
 
         dragStartOffset.current = {
@@ -249,7 +240,6 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
       const canvas = canvasRef.current
       if (canvas) {
         const overlayDrawSize = scale * canvas.width * 0.3
-        // 경계 제한 로직은 회전되지 않은 바운딩 박스 기준으로 유지
         const allowanceFactor = 0.25
         const allowance = overlayDrawSize * allowanceFactor
         const minX = -allowance
@@ -274,29 +264,24 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
     if (isDragging) {
       setIsDragging(false)
       if (isMobile && originalBodyOverflowY.current !== undefined) {
-        // 복원 조건 명확화
         document.body.style.overflowY = originalBodyOverflowY.current
         originalBodyOverflowY.current = '' // 참조 초기화
       }
     }
   }, [isDragging, isMobile])
 
-  // --- Passive Event Listener Setup ---
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || isFullAsset) return // 전체 에셋일 경우 터치 제어 불필요
 
-    // 핸들러 내부에서 최신 상태를 참조하도록 수정 (useCallback 대신 직접 정의)
     const touchStartHandler = (e: TouchEvent) => {
       const currentCoords = getCoords(e)
-      // isWithinOverlay 호출 시 최신 scale, overlayPos 사용
       if (currentCoords && isWithinOverlay(currentCoords.x, currentCoords.y)) {
         e.preventDefault()
       }
     }
 
     const touchMoveHandler = (e: TouchEvent) => {
-      // isDragging 상태를 직접 참조
       if (touchStartedOnAsset.current || isDragging) {
         e.preventDefault()
       }
@@ -309,15 +294,12 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
       canvas.removeEventListener('touchstart', touchStartHandler)
       canvas.removeEventListener('touchmove', touchMoveHandler)
     }
-    // ✅ isDragging, getCoords, isWithinOverlay, isFullAsset 추가 (핸들러가 최신 상태 참조하도록)
   }, [getCoords, isWithinOverlay, isDragging, isFullAsset])
 
-  // --- Rotation Handlers ---
   const handleRotate = useCallback((degreeDelta: number) => {
     setRotation((prev) => (prev + degreeDelta + 360) % 360) // 0~359도 유지
   }, [])
 
-  // Helper function to convert Data URL to Blob
   const dataURLtoBlob = (dataurl: string): Blob | null => {
     try {
       const arr = dataurl.split(',')
@@ -337,14 +319,12 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
       return null
     }
   }
-  // Native Share Handler
   const handleNativeShare = useCallback(async () => {
     if (!downloadUrl) {
       alert('이미지를 생성 중이거나 오류가 발생했습니다.')
       return
     }
 
-    // Check if Web Share API is supported
     if (!navigator.share) {
       alert(
         '이 브라우저/기기에서는 공유 기능을 지원하지 않습니다. 이미지를 다운로드하여 공유해주세요.'
@@ -352,7 +332,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
       return
     }
 
-    setIsSharing(true) // Indicate sharing process start
+    setIsSharing(true) // 👇 공유 시작 표시
 
     const blob = dataURLtoBlob(downloadUrl)
     if (!blob) {
@@ -361,45 +341,50 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
       return
     }
 
-    const file = new File([blob], 'campaign-image.png', { type: 'image/png' })
+    const file = new File([blob], 'rainbowaction-profile.png', {
+      type: 'image/png',
+    })
     const shareData = {
       files: [file],
-      title: '캠페인 이미지', // Optional: Customize title
-      text: '캠페인 참여 이미지를 공유합니다!', // Optional: Customize text
-      // url: 'https://your-campaign-url.com' // Optional: Add a link
+      title: '캠페인 이미지',
+      text: '나의 수호동지 프로필 이미지를 공유합니다!',
+      url: 'https://profile.rainbowaction.kr/',
     }
 
     try {
-      // Check if the data can be shared (optional but recommended)
       if (navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData)
         console.log('이미지 공유 성공')
       } else if (!navigator.canShare) {
-        // If canShare isn't supported, just try sharing directly
         await navigator.share(shareData)
         console.log('이미지 공유 성공 (canShare not supported)')
       } else {
-        // Fallback if canShare returns false
         alert(
           '이 이미지 파일은 공유할 수 없습니다. 다운로드 후 직접 공유해주세요.'
         )
+        return
       }
+
+      await supabase.from('image_creations').insert({
+        asset: overlay,
+        anonymous_id: localStorage.getItem('anonymous_id'),
+        user_agent: navigator.userAgent,
+        stage: 'shared',
+      })
     } catch (error) {
       console.error('이미지 공유 실패:', error)
-      // Don't alert on AbortError (user cancellation)
       if (error instanceof Error && error.name !== 'AbortError') {
         alert(`공유 중 오류가 발생했습니다: ${error.message}`)
       }
     } finally {
-      setIsSharing(false) // Indicate sharing process end regardless of outcome
+      setIsSharing(false) // ✅ 반드시 공유 상태 초기화
     }
-  }, [downloadUrl]) // Dependency: downloadUrl
+  }, [downloadUrl, overlay])
 
   // --- Render ---
   return (
     <div className="mt-1 text-center select-none">
-      <h2 className="text-base font-semibold mb-3">미리보기</h2>
-      <div className="mx-auto w-full max-w-[360px] overflow-hidden bg-gray-50 border border-gray-200 rounded-2xl shadow-sm px-4 py-5">
+      <div className="mx-auto w-full max-w-[360px] overflow-hidden bg-gray-50 border border-gray-200 rounded-2xl px-4 py-5">
         {isMobile && !isFullAsset && (
           <p className="mb-2 text-xs text-gray-500">
             📍 에셋을 길게(1초) 누르면 이동할 수 있어요!
@@ -420,8 +405,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
             className={`block w-full max-w-full border border-gray-300 rounded bg-white ${
               isFullAsset ? 'cursor-default' : 'cursor-move'
             } transition-all duration-200 ease-out`}
-            // passive 리스너를 사용하므로 touchAction 제거 또는 auto 유지 가능
-            style={{ touchAction: isFullAsset ? 'auto' : 'manipulation' }} // 'none' 대신 'manipulation'으로 변경하여 브라우저 기본 확대/축소 등은 가능하게 할 수 있음
+            style={{ touchAction: isFullAsset ? 'auto' : 'manipulation' }}
           />
           {isDragging && (
             <div className="absolute inset-0 border-2 border-blue-500 pointer-events-none rounded opacity-75" />
@@ -431,7 +415,10 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
         {!isFullAsset && (
           <div className="mt-4 space-y-3">
             <div className="flex flex-col items-center gap-1">
-              <label htmlFor="scale-slider" className="text-sm text-gray-600">
+              <label
+                htmlFor="scale-slider"
+                className="text-sm text-gray-600 font-medium"
+              >
                 크기 조절
               </label>
               <input
@@ -445,12 +432,11 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
                 className="w-full h-6 accent-blue-600 touch-pan-y cursor-pointer" // touch-pan-y 추가
               />
             </div>
-            {/* --- 회전 조절 --- */}
             <div className="flex flex-col items-center gap-2">
-              {/* ✅ gap 추가 */}
-              <span className="text-sm text-gray-600">이미지 회전</span>
+              <span className="text-sm text-gray-600 font-medium">
+                이미지 회전
+              </span>
               <div className="flex justify-center gap-3">
-                {/* ✅ 버튼 간격 */}
                 <button
                   type="button"
                   onClick={() => handleRotate(-10)}
@@ -467,7 +453,6 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
                 >
                   ↻ 우
                 </button>
-                {/* Optional: Reset Rotation Button */}
                 <button
                   type="button"
                   onClick={() => setRotation(0)}
@@ -475,7 +460,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
                   className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   aria-label="회전 초기화"
                 >
-                  Reset
+                  초기화
                 </button>
               </div>
             </div>
@@ -484,17 +469,10 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
 
         {downloadUrl && (
           <div className="mt-5 space-y-3">
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition cursor-pointer"
-              disabled={isSharing}
-            >
-              사진 다시 고르기
-            </button>
+            <hr />
             <a
               href={downloadUrl}
-              download="campaign-image.png"
+              download="rainbowaction-profile.png"
               onClick={onDownload}
               className={`block no-underline hover:no-underline w-full text-center px-4 py-2.5 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition border border-gray-800 ${
                 isSharing ? 'opacity-60 pointer-events-none' : 'cursor-pointer'
@@ -506,10 +484,19 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
             <button
               type="button"
               onClick={handleNativeShare}
-              disabled={isSharing} // Disable button while sharing
+              disabled={isSharing}
               className="block no-underline hover:no-underline w-full text-center px-4 py-2.5 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition border border-blue-600 disabled:opacity-60 disabled:cursor-wait" // Added disabled style
             >
               {isSharing ? '공유 준비 중...' : '공유하기'}
+            </button>
+            <hr />
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition cursor-pointer"
+              disabled={isSharing}
+            >
+              사진 다시 고르기
             </button>
           </div>
         )}

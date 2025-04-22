@@ -52,20 +52,49 @@ export default function Uploader({ onSelect, onClear }: Props) {
     // 필요하다면 여기서도 에러 상태 초기화: setCameraError(false);
   }
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // ... (기존 코드 동일)
-    const file = e.target.files?.[0]
-    if (file) {
-      onSelect(file)
-      setUploadedFileName(file.name)
-      setCaptured(false) // 카메라 관련 상태 초기화
-      setPhotoDataUrl(null)
-      setCameraError(false) // 모드 변경 시 에러 상태 초기화
+  const MAX_SIZE = 720 // 최대 해상도(px)
 
-      const reader = new FileReader()
-      reader.onloadend = () => setUploadedPreview(reader.result as string)
-      reader.readAsDataURL(file)
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const result = reader.result
+      if (typeof result !== 'string') return
+
+      const img = document.createElement('img') // ✅ 타입 에러 없음
+      img.onload = () => {
+        const size = Math.min(img.width, img.height)
+        const sx = (img.width - size) / 2
+        const sy = (img.height - size) / 2
+        const outputSize = Math.min(size, MAX_SIZE)
+
+        const canvas = document.createElement('canvas')
+        canvas.width = outputSize
+        canvas.height = outputSize
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
+
+        ctx.drawImage(img, sx, sy, size, size, 0, 0, outputSize, outputSize)
+
+        canvas.toBlob((blob) => {
+          if (!blob) return
+
+          const resizedFile = new File([blob], file.name, { type: file.type })
+          onSelect(resizedFile)
+          setUploadedFileName(file.name)
+          setCaptured(false)
+          setPhotoDataUrl(null)
+          setCameraError(false)
+          setUploadedPreview(canvas.toDataURL(file.type)) // 미리보기는 DataURL로
+        }, file.type)
+      }
+
+      img.src = result
     }
+
+    reader.readAsDataURL(file)
   }
 
   const takePhoto = () => {
