@@ -69,7 +69,7 @@ export default function Step2_PreviewAndDownload({
   return (
     <div className="w-full">
       {/* 에셋 선택 가로 스크롤 */}
-      <div className="overflow-x-auto pb-2 -mx-4 px-4">
+      <div className="overflow-x-auto pb-2 custom-scrollbar">
         <div className="flex gap-3">
           {labels.map((label, i) => {
             const asset = `asset${String(i + 1).padStart(2, '0')}.png`
@@ -81,7 +81,7 @@ export default function Step2_PreviewAndDownload({
                 className={`flex flex-col items-center justify-center w-24 shrink-0 p-2 rounded-xl border text-xs transition ${
                   selected
                     ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
-                    : 'border-gray-200 bg-white text-gray-700'
+                    : 'bg-white border-gray-300 hover:bg-gray-100 text-gray-700'
                 }`}
               >
                 <Image

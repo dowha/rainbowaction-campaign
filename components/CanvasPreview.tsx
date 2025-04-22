@@ -12,11 +12,6 @@ const getInitialPos = (overlay: string): { x: number; y: number } => {
   return { x: 240, y: 240 }
 }
 
-const getInitialScale = (overlay: string): number => {
-  if (overlay === 'asset01.png') return 1.8
-  return 1
-}
-
 const isFullAssetOverlay = (overlay: string): boolean => {
   return ['asset08.png', 'asset09.png', 'asset10.png'].includes(overlay)
 }
@@ -26,7 +21,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
   const [overlayPos, setOverlayPos] = useState(() => getInitialPos(overlay))
-  const [scale, setScale] = useState(() => getInitialScale(overlay))
+  const [scale, setScale] = useState<number>(1.8) // ← getInitialScale 제거하고 고정
   const [rotation, setRotation] = useState<number>(0) // ✅ 회전 상태 추가 (단위: 도)
   const [isDragging, setIsDragging] = useState(false)
 
@@ -425,13 +420,13 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
               onClick={() => window.location.reload()}
               className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition cursor-pointer"
             >
-              사진 다시 올리기
+              사진 다시 고르기
             </button>
             <a
               href={downloadUrl}
               download="campaign-image.png"
-              onClick={onDownload} // 이미 함수 참조이므로 람다 제거 가능
-              className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition"
+              onClick={onDownload}
+              className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition border border-gray-800" // border border-gray-800 추가
             >
               이미지 다운로드
             </a>

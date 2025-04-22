@@ -104,7 +104,7 @@ export default function Home() {
               .
             </p>
             <p className="text-xs">
-              With ❤️ by{' '}
+              Made with ♥ by{' '}
               <a
                 href="https://dowha.kim"
                 className="text-gray-400 no-underline"
