@@ -186,11 +186,11 @@ export default function Uploader({ onSelect, onClear }: Props) {
               htmlFor="file-upload"
               className={`cursor-pointer px-4 py-2 rounded-md transition text-sm ${
                 uploadedFileName
-                  ? 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                  ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                   : 'bg-yellow-500 text-white hover:bg-yellow-600'
               }`}
             >
-              {uploadedFileName ? '📁 다른 사진 선택' : '📁 앨범에서 사진 선택'}
+              {uploadedFileName ? '📂 다른 사진 선택' : '📁 앨범에서 사진 선택'}
             </label>
             <input
               id="file-upload"

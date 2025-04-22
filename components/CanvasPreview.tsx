@@ -493,7 +493,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition cursor-pointer"
+              className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition cursor-pointer disabled:opacity-60 disabled:pointer-events-none"
               disabled={isSharing}
             >
               사진 다시 고르기

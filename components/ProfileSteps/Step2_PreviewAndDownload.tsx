@@ -3,7 +3,7 @@
 import CanvasPreview from '@/components/CanvasPreview'
 import { supabase } from '@/lib/supabase'
 import Image from 'next/image'
-
+import { useRef, useEffect } from 'react'
 const labels: string[] = [
   '무지개 머리띠',
   '투쟁 머리띠',
@@ -41,6 +41,27 @@ export default function Step2_PreviewAndDownload({
     }
   }
 
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const selectedIndex = labels.findIndex(
+        (_, i) => overlayFile === `asset${String(i + 1).padStart(2, '0')}.png`
+      )
+      const selectedRef = buttonRefs.current[selectedIndex]
+      if (selectedRef) {
+        selectedRef.scrollIntoView({
+          behavior: 'smooth',
+          inline: 'center',
+          block: 'nearest',
+        })
+      }
+    }, 50) // DOM 렌더링 완료를 기다리기 위한 약간의 딜레이
+
+    return () => clearTimeout(timeout)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // ← 빈 배열로 최초 진입 시 1회만 실행
+
   return (
     <div className="w-full">
       <div className="overflow-x-auto pb-2 custom-scrollbar">
@@ -51,6 +72,9 @@ export default function Step2_PreviewAndDownload({
             return (
               <button
                 key={asset}
+                ref={(el: HTMLButtonElement | null) => {
+                  buttonRefs.current[i] = el
+                }}
                 onClick={() => setOverlayFile(asset)}
                 className={`flex flex-col items-center justify-center w-24 shrink-0 p-2 rounded-xl border text-xs transition ${
                   selected
