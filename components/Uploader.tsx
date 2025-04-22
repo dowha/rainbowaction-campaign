@@ -15,6 +15,7 @@ export default function Uploader({ onSelect }: Props) {
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [uploadedPreview, setUploadedPreview] = useState<string | null>(null)
 
   const startCamera = async () => {
     try {
@@ -38,12 +39,21 @@ export default function Uploader({ onSelect }: Props) {
     setStreaming(false)
   }
 
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null)
+
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       onSelect(file)
+      setUploadedFileName(file.name)
       setCaptured(false)
       setPhotoDataUrl(null)
+
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setUploadedPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
     }
   }
 
@@ -77,16 +87,16 @@ export default function Uploader({ onSelect }: Props) {
 
   return (
     <div className="mb-6">
-      <div className="flex justify-center gap-2 mb-3 text-sm font-medium">
+      <div className="flex justify-center gap-2 mb-4 text-sm font-medium">
         <button
           onClick={() => {
             setMode('upload')
             stopCamera()
           }}
-          className={`px-3 py-1 rounded-full ${
+          className={`px-4 py-2 border rounded-md transition ${
             mode === 'upload'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-600'
+              ? 'bg-blue-600 text-white border-blue-600'
+              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
           }`}
         >
           사진 업로드
@@ -96,10 +106,10 @@ export default function Uploader({ onSelect }: Props) {
             setMode('camera')
             startCamera()
           }}
-          className={`px-3 py-1 rounded-full ${
+          className={`px-4 py-2 border rounded-md transition ${
             mode === 'camera'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-600'
+              ? 'bg-blue-600 text-white border-blue-600'
+              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
           }`}
         >
           카메라로 촬영
@@ -107,13 +117,47 @@ export default function Uploader({ onSelect }: Props) {
       </div>
 
       {mode === 'upload' && (
-        <div className="text-center text-sm">
+        <div className="flex flex-col items-center justify-center text-sm">
+          <label
+            htmlFor="file-upload"
+            className={`cursor-pointer px-4 py-2 rounded-md transition text-sm ${
+              uploadedFileName
+                ? 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                : 'bg-yellow-500 text-white hover:bg-yellow-600'
+            }`}
+          >
+            {uploadedFileName ? '📁 다른 사진 선택하기' : '📁 사진 선택하기'}
+          </label>
           <input
+            id="file-upload"
             type="file"
             accept="image/*"
             onChange={handleUpload}
-            className="block mx-auto mb-2 text-sm"
+            className="hidden"
           />
+          <p className="mt-2 text-gray-500 text-xs text-center">
+            PNG, JPG 등 이미지 파일을 업로드하세요. <br />
+            정사각형 비율로 촬영된 사진이 가장 잘 어울립니다.
+          </p>
+          {uploadedFileName && (
+            <div className="mt-3 text-xs text-gray-700 text-center">
+              <p className="mb-1">
+                ✅ 선택된 파일:{' '}
+                <span className="font-medium">{uploadedFileName}</span>
+              </p>
+              {uploadedPreview && (
+                <div className="mx-auto w-16 h-16 relative rounded border overflow-hidden">
+                  <Image
+                    src={uploadedPreview}
+                    alt="업로드 미리보기"
+                    fill
+                    unoptimized
+                    className="object-cover"
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

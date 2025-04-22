@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Image from 'next/image'
 import Step1_UploadAndSelect from '@/components/ProfileSteps/Step1_UploadAndSelect'
@@ -10,6 +10,10 @@ export default function Home() {
   const [step, setStep] = useState<1 | 2>(1)
   const [image, setImage] = useState<File | null>(null)
   const [overlayFile, setOverlayFile] = useState('asset01.png')
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [step])
 
   return (
     <>
