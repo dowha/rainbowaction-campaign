@@ -3,8 +3,9 @@ import React, { useEffect, useRef, useState, useCallback } from 'react'
 interface Props {
   image: File
   overlay: string
-  onDownload?: () => void // ✅ prop 추가
+  onDownload?: () => void
 }
+
 // --- Helper functions (outside component) ---
 const getInitialPos = (overlay: string): { x: number; y: number } => {
   if (overlay === 'asset01.png') return { x: 240, y: 30 }
@@ -26,6 +27,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
   const [overlayPos, setOverlayPos] = useState(() => getInitialPos(overlay))
   const [scale, setScale] = useState(() => getInitialScale(overlay))
+  const [rotation, setRotation] = useState<number>(0) // ✅ 회전 상태 추가 (단위: 도)
   const [isDragging, setIsDragging] = useState(false)
 
   const dragStartOffset = useRef({ x: 0, y: 0 })
@@ -33,7 +35,6 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
   const objectUrlRef = useRef<string | null>(null)
   const originalBodyOverflowY = useRef<string>('')
 
-  // 터치가 에셋 위에서 시작되었는지 추적하는 ref
   const touchStartedOnAsset = useRef(false)
 
   const isFullAsset = isFullAssetOverlay(overlay)
@@ -63,6 +64,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
         canvas.height = exportSize
         ctx.clearRect(0, 0, canvas.width, canvas.height)
 
+        // Draw Base Image (Cropped to Square)
         const shortSide = Math.min(baseImage.width, baseImage.height)
         const sx = (baseImage.width - shortSide) / 2
         const sy = (baseImage.height - shortSide) / 2
@@ -78,17 +80,25 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
           exportSize
         )
 
+        // Draw Overlay Image
         if (isFullAsset) {
           ctx.drawImage(overlayImg, 0, 0, exportSize, exportSize)
         } else {
           const overlayDrawSize = scale * exportSize * 0.3
+          const centerX = overlayPos.x + overlayDrawSize / 2
+          const centerY = overlayPos.y + overlayDrawSize / 2
+
+          ctx.save() // ✅ 현재 캔버스 상태 저장
+          ctx.translate(centerX, centerY) // ✅ 캔버스 원점을 에셋 중심으로 이동
+          ctx.rotate((rotation * Math.PI) / 180) // ✅ 회전 적용 (라디안 단위)
           ctx.drawImage(
             overlayImg,
-            overlayPos.x,
-            overlayPos.y,
+            -overlayDrawSize / 2, // ✅ 이동된 원점 기준으로 이미지 그리기 (중앙 정렬)
+            -overlayDrawSize / 2,
             overlayDrawSize,
             overlayDrawSize
           )
+          ctx.restore() // ✅ 이전 캔버스 상태 복원 (translate, rotate 해제)
         }
         setDownloadUrl(canvas.toDataURL('image/png'))
       }
@@ -125,11 +135,15 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current)
       }
-      if (document.body.style.overflowY !== originalBodyOverflowY.current) {
+      if (
+        isMobile && // 모바일에서만 복원 로직 실행
+        document.body.style.overflowY !== originalBodyOverflowY.current
+      ) {
         document.body.style.overflowY = originalBodyOverflowY.current
       }
     }
-  }, [image, overlay, overlayPos, scale, isFullAsset])
+    // ✅ rotation을 의존성 배열에 추가
+  }, [image, overlay, overlayPos, scale, rotation, isFullAsset, isMobile]) // isMobile 추가
 
   // --- Interaction Helper Functions ---
   const getCoords = useCallback(
@@ -152,6 +166,8 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
     []
   )
 
+  // isWithinOverlay는 회전을 고려하지 않은 원래의 사각형 영역을 기준으로 합니다.
+  // 드래그 시작 판정에는 이 방식이 더 직관적일 수 있습니다.
   const isWithinOverlay = useCallback(
     (x: number, y: number): boolean => {
       if (isFullAsset) return false
@@ -172,7 +188,6 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
   const startDragging = useCallback(() => {
     if (!isDragging) {
       setIsDragging(true)
-      // 모바일에서만 body overflow를 변경하고, PC에서는 변경하지 않음
       if (isMobile) {
         originalBodyOverflowY.current = document.body.style.overflowY
         document.body.style.overflowY = 'hidden'
@@ -180,19 +195,17 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
     }
   }, [isDragging, isMobile])
 
-  // --- Event Handlers (수정됨) ---
+  // --- Event Handlers ---
   const handleInteractionStart = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
       if (isFullAsset) return
       const coords = getCoords(e.nativeEvent)
 
       if (coords && isWithinOverlay(coords.x, coords.y)) {
-        // 에셋 내부에서 시작
-        touchStartedOnAsset.current = true // 플래그 설정
+        touchStartedOnAsset.current = true
 
-        // 중요: 터치 이벤트인 경우 기본 동작 방지
         if ('touches' in e.nativeEvent) {
-          e.preventDefault() // 터치 시작 시점에서 기본 동작 방지
+          // e.preventDefault(); // passive: false 리스너에서 처리하도록 주석 처리
         }
 
         dragStartOffset.current = {
@@ -210,8 +223,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
           startDragging()
         }
       } else {
-        // 에셋 외부에서 시작
-        touchStartedOnAsset.current = false // 플래그 해제
+        touchStartedOnAsset.current = false
         if (longPressTimer.current) {
           clearTimeout(longPressTimer.current)
           longPressTimer.current = null
@@ -230,12 +242,11 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
 
   const handleInteractionMove = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
-      // 터치 이벤트이고 에셋 위에서 시작된 경우 기본 동작 방지
-      if ('touches' in e.nativeEvent && touchStartedOnAsset.current) {
-        e.preventDefault() // 터치 이동 중에도 기본 동작 방지
-      }
+      // passive: false 리스너에서 처리하므로 주석 처리
+      // if ('touches' in e.nativeEvent && touchStartedOnAsset.current) {
+      //   e.preventDefault();
+      // }
 
-      // 드래그 중이 아니거나 전체 에셋인 경우 위치 업데이트 안 함
       if (!isDragging || isFullAsset) return
 
       const coords = getCoords(e.nativeEvent)
@@ -247,7 +258,8 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
       const canvas = canvasRef.current
       if (canvas) {
         const overlayDrawSize = scale * canvas.width * 0.3
-        const allowanceFactor = 0.25 // 허용 범위
+        // 경계 제한 로직은 회전되지 않은 바운딩 박스 기준으로 유지
+        const allowanceFactor = 0.25
         const allowance = overlayDrawSize * allowanceFactor
         const minX = -allowance
         const minY = -allowance
@@ -262,8 +274,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
   )
 
   const handleInteractionEnd = useCallback(() => {
-    // 터치 종료 시 ref 초기화
-    touchStartedOnAsset.current = false // 플래그 해제
+    touchStartedOnAsset.current = false
 
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current)
@@ -271,32 +282,35 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
     }
     if (isDragging) {
       setIsDragging(false)
-      // 모바일에서만 body overflow를 복원
-      if (isMobile && originalBodyOverflowY.current !== '') {
+      if (isMobile && originalBodyOverflowY.current !== undefined) {
+        // 복원 조건 명확화
         document.body.style.overflowY = originalBodyOverflowY.current
+        originalBodyOverflowY.current = '' // 참조 초기화
       }
     }
   }, [isDragging, isMobile])
 
-  // Canvas 요소에 대한 passive: false 설정을 위한 useEffect
+  // --- Passive Event Listener Setup ---
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!canvas || isFullAsset) return // 전체 에셋일 경우 터치 제어 불필요
 
+    // 핸들러 내부에서 최신 상태를 참조하도록 수정 (useCallback 대신 직접 정의)
     const touchStartHandler = (e: TouchEvent) => {
-      const coords = getCoords(e)
-      if (coords && isWithinOverlay(coords.x, coords.y)) {
+      const currentCoords = getCoords(e)
+      // isWithinOverlay 호출 시 최신 scale, overlayPos 사용
+      if (currentCoords && isWithinOverlay(currentCoords.x, currentCoords.y)) {
         e.preventDefault()
       }
     }
 
     const touchMoveHandler = (e: TouchEvent) => {
+      // isDragging 상태를 직접 참조
       if (touchStartedOnAsset.current || isDragging) {
         e.preventDefault()
       }
     }
 
-    // passive: false로 이벤트 리스너 추가 (브라우저에게 preventDefault()를 호출할 수 있음을 알림)
     canvas.addEventListener('touchstart', touchStartHandler, { passive: false })
     canvas.addEventListener('touchmove', touchMoveHandler, { passive: false })
 
@@ -304,7 +318,13 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
       canvas.removeEventListener('touchstart', touchStartHandler)
       canvas.removeEventListener('touchmove', touchMoveHandler)
     }
-  }, [getCoords, isWithinOverlay, isDragging])
+    // ✅ isDragging, getCoords, isWithinOverlay, isFullAsset 추가 (핸들러가 최신 상태 참조하도록)
+  }, [getCoords, isWithinOverlay, isDragging, isFullAsset])
+
+  // --- Rotation Handlers ---
+  const handleRotate = useCallback((degreeDelta: number) => {
+    setRotation((prev) => (prev + degreeDelta + 360) % 360) // 0~359도 유지
+  }, [])
 
   // --- Render ---
   return (
@@ -331,7 +351,8 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
             className={`block w-full max-w-full border border-gray-300 rounded bg-white ${
               isFullAsset ? 'cursor-default' : 'cursor-move'
             } transition-all duration-200 ease-out`}
-            style={{ touchAction: isFullAsset ? 'auto' : 'none' }} // 추가: touchAction 명시적 설정
+            // passive 리스너를 사용하므로 touchAction 제거 또는 auto 유지 가능
+            style={{ touchAction: isFullAsset ? 'auto' : 'manipulation' }} // 'none' 대신 'manipulation'으로 변경하여 브라우저 기본 확대/축소 등은 가능하게 할 수 있음
           />
           {isDragging && (
             <div className="absolute inset-0 border-2 border-blue-500 pointer-events-none rounded opacity-75" />
@@ -339,20 +360,61 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
         </div>
 
         {!isFullAsset && (
-          <div className="flex flex-col items-center gap-1 mt-4">
-            <label htmlFor="scale-slider" className="text-sm text-gray-600">
-              크기 조절
-            </label>
-            <input
-              id="scale-slider"
-              type="range"
-              min="0.5"
-              max="3"
-              step="0.05"
-              value={scale}
-              onChange={(e) => setScale(parseFloat(e.target.value))}
-              className="w-full h-6 accent-blue-600 touch-none cursor-pointer"
-            />
+          <div className="mt-4 space-y-3">
+            {' '}
+            {/* ✅ 간격 조절을 위해 space-y 추가 */}
+            {/* --- 크기 조절 --- */}
+            <div className="flex flex-col items-center gap-1">
+              <label htmlFor="scale-slider" className="text-sm text-gray-600">
+                크기 조절
+              </label>
+              <input
+                id="scale-slider"
+                type="range"
+                min="0.5"
+                max="3"
+                step="0.05"
+                value={scale}
+                onChange={(e) => setScale(parseFloat(e.target.value))}
+                className="w-full h-6 accent-blue-600 touch-pan-y cursor-pointer" // touch-pan-y 추가
+              />
+            </div>
+            {/* --- 회전 조절 --- */}
+            <div className="flex flex-col items-center gap-2">
+              {' '}
+              {/* ✅ gap 추가 */}
+              <span className="text-sm text-gray-600">이미지 회전</span>
+              <div className="flex justify-center gap-3">
+                {' '}
+                {/* ✅ 버튼 간격 */}
+                <button
+                  type="button"
+                  onClick={() => handleRotate(-15)} // 15도씩 회전
+                  className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                  aria-label="왼쪽으로 회전"
+                >
+                  ↺ 좌
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleRotate(15)} // 15도씩 회전
+                  className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                  aria-label="오른쪽으로 회전"
+                >
+                  ↻ 우
+                </button>
+                {/* Optional: Reset Rotation Button */}
+                <button
+                  type="button"
+                  onClick={() => setRotation(0)}
+                  disabled={rotation === 0} // 회전 안됐으면 비활성화
+                  className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label="회전 초기화"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -368,9 +430,7 @@ export default function CanvasPreview({ image, overlay, onDownload }: Props) {
             <a
               href={downloadUrl}
               download="campaign-image.png"
-              onClick={() => {
-                onDownload?.() // ✅ 콜백 실행
-              }}
+              onClick={onDownload} // 이미 함수 참조이므로 람다 제거 가능
               className="block no-underline hover:no-underline w-full text-center px-4 py-2 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition"
             >
               이미지 다운로드

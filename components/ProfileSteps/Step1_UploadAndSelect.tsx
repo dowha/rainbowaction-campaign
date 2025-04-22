@@ -20,9 +20,9 @@ const labels: string[] = [
 
 type Props = {
   image: File | null
-  setImage: (file: File) => void
-  overlayFile: string
+  setImage: (file: File | null) => void // ← 수정됨  overlayFile: string
   setOverlayFile: (file: string) => void
+  overlayFile: string // ✅ 이 줄이 꼭 있어야 합니다!
   onNext: () => void
 }
 
@@ -56,6 +56,10 @@ export default function Step1_UploadAndSelect({
         onSelect={(file) => {
           setImage(file)
           setOverlayFile('asset01.png') // 기본 에셋
+        }}
+        onClear={() => {
+          setImage(null)
+          setOverlayFile('') // 또는 'asset01.png'로 초기화
         }}
       />
 

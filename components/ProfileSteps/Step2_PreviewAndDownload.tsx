@@ -109,9 +109,6 @@ export default function Step2_PreviewAndDownload({
           overlay={overlayFile}
           onDownload={handleDownloadLog}
         />
-        <p className="text-center text-xs text-gray-400 mt-6">
-          🔒 이미지는 브라우저에서만 처리되며, 서버에 저장되지 않습니다.
-        </p>
       </div>
     </div>
   )
