@@ -74,18 +74,13 @@ export default function Step1_UploadAndSelect({
                 <button
                   key={asset}
                   onClick={() => setOverlayFile(asset)}
-                  // --- 수정: relative 추가 ---
                   className={`relative w-full h-28 rounded-xl border p-1 text-xs font-medium flex flex-col items-center justify-between text-center transition overflow-hidden ${
-                    // overflow-hidden 추가 (선택 사항)
                     selected
                       ? 'border-blue-500 bg-blue-50 text-gray-700 shadow-sm'
                       : 'bg-white border-gray-300 hover:bg-gray-100 text-gray-700'
                   }`}
                 >
-                  {/* 기존 카드 내용 */}
                   <div className="relative w-12 h-12 mt-1">
-                    {' '}
-                    {/* 약간의 상단 마진 추가 */}
                     <Image
                       src={`/${asset}`}
                       alt={label}
@@ -97,22 +92,16 @@ export default function Step1_UploadAndSelect({
                     />
                   </div>
                   <span className="whitespace-pre-line leading-tight min-h-[2.75rem] flex items-center justify-center mb-1">
-                    {' '}
-                    {/* 약간의 하단 마진 추가 */}
                     {label}
                   </span>
 
-                  {/* --- 추가: 선택된 경우 시작 버튼 렌더링 --- */}
                   {selected && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-10">
-                      {' '}
-                      {/* 배경 오버레이 */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation() // 중요: 이벤트 버블링 방지
                           handleProceed()
                         }}
-                        // --- 수정: 스타일 조정 ---
                         className="px-4 py-1.5 bg-blue-600 bg-opacity-90 text-white text-xs rounded-full hover:bg-blue-700 transition shadow-md z-10" // 크기, z-index 등 조정
                       >
                         ✅ 꾸미기 시작하기

@@ -43,7 +43,6 @@ export default function Step2_PreviewAndDownload({
 
   return (
     <div className="w-full">
-      {/* 에셋 선택 가로 스크롤 */}
       <div className="overflow-x-auto pb-2 custom-scrollbar">
         <div className="flex gap-3">
           {labels.map((label, i) => {
@@ -77,7 +76,6 @@ export default function Step2_PreviewAndDownload({
         </div>
       </div>
 
-      {/* 이미지 미리보기 */}
       <div className="max-w-md mx-auto mt-6">
         <CanvasPreview
           image={image}

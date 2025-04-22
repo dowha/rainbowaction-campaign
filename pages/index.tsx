@@ -64,7 +64,7 @@ export default function Home() {
         </header>
 
         {/* 본문 */}
-        <main className="w-full max-w-[420px] mx-auto px-4 pt-[120px] pb-[80px] bg-white">
+        <main className="w-full max-w-[420px] mx-auto px-4 pt-[100px] pb-[20px] bg-white">
           {step === 1 || !image ? (
             <Step1_UploadAndSelect
               image={image}
