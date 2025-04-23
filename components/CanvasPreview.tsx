@@ -538,7 +538,7 @@ ctx.drawImage(
     onClick={() => setBgScale((s) => Math.min(s + 0.1, 2.5))}
     className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
   >
-    +
+    + 확대
   </button>
 <button
   onClick={() => {
@@ -549,8 +549,17 @@ ctx.drawImage(
   disabled={bgScale <= 1}
   className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
 >
-  -
+  - 축소
 </button>
+                     <button
+    onClick={() => {
+      setBgScale(1)
+      setBgOffset({ x: 0, y: 0 })
+    }}
+    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+  >
+    초기화
+  </button> <br />
   <button
     onClick={() => setBgOffset((o) => ({ ...o, y: o.y - 10 }))}
     disabled={bgScale === 1}
@@ -578,15 +587,6 @@ ctx.drawImage(
     className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
   >
     ➡️
-  </button>
-  <button
-    onClick={() => {
-      setBgScale(1)
-      setBgOffset({ x: 0, y: 0 })
-    }}
-    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
-  >
-    초기화
   </button>
           </div>
                </div>
