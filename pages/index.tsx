@@ -246,16 +246,7 @@ export default function Home() {
               </a>
               .
             </p>
-            <p className="text-[#E1A8BD] text-xs pb-4">
-              Made with ♥ by{' '}
-              <a
-                href="https://dowha.kim"
-                className="text-[#E1A8BD] no-underline"
-                target="_blank"
-              >
-                Dowha
-              </a>
-            </p>
+            <p className="text-[#E1A8BD] text-xs pb-4">Made with ♥</p>
           </div>
         </footer>
       </div>
