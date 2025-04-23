@@ -126,7 +126,7 @@ export default function Home() {
             >
               {step === 0 ? (
                 <div className="text-center space-y-6">
-                  {!isInAppBrowser && (
+                  {isInAppBrowser && (
                     <p className="text-xs text-red-800 px-4 py-3 border border-red-300 bg-red-50 rounded-3xl animate-pulse">
                       ⚠️ 텔레그램, 인스타그램, 페이스북 등 일부 앱의 내부
                       브라우저에서는 이미지가 정상적으로 다운로드되지 않을 수
@@ -209,8 +209,8 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="w-full mt-auto">
-          <div className="max-w-[420px] mx-auto text-center text-sm text-gray-400 bg-white py-3">
-            <div className="w-full bg-[#F1F5FF] text-[#415E9A] leading-tight text-center py-4 px-4 border-y border-[#84C0D3] font-medium tracking-tight">
+          <div className="max-w-[420px] mx-auto text-center text-sm text-gray-400 bg-white pt-3">
+            <div className="w-full bg-[#F1F5FF] text-[#415E9A] leading-tight text-center py-4 px-4 border-t border-[#84C0D3] font-medium tracking-tight">
               전체 캠페인 정보는{' '}
               <a
                 href="https://rainbowaction.kr"
@@ -222,21 +222,22 @@ export default function Home() {
               </a>
               에서 확인하실 수 있어요.
             </div>
-            {/* Existing Footer Info */}
-            <p className="pt-4 pb-1 text-black">
-              <span className="text-[#2A559B]">
-                <strong>후원하기</strong>
-              </span>
-              <br />
-              <a
-                href="https://aq.gy/f/2K1E%5E"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                국민은행 408801-01-317159 성소수자차별반대 무지개행동
-              </a>
-            </p>
-            <p className="pb-1 text-sm text-black">
+            <div className="w-full bg-[#F8E6ED] leading-tight text-center py-4 px-4 border-y border-[#e1a8bd] font-medium tracking-tight">
+              <p className="text-gray-700">
+                <span className="text-black">
+                  <strong>후원하기</strong>
+                </span>
+                <br />
+                <a
+                  href="https://aq.gy/f/2K1E%5E"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  국민은행 408801-01-317159 성소수자차별반대 무지개행동
+                </a>
+              </p>
+            </div>
+            <p className="py-2 text-sm text-black">
               © {new Date().getFullYear()} 성소수자차별반대{' '}
               <a
                 href="mailto:contact@rainbowaction.kr"
@@ -246,7 +247,6 @@ export default function Home() {
               </a>
               .
             </p>
-            <p className="text-[#E1A8BD] text-xs pb-4">Made with ♥</p>
           </div>
         </footer>
       </div>
