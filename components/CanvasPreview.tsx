@@ -559,7 +559,8 @@ ctx.drawImage(
     className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
   >
     초기화
-  </button> <br />
+  </button> </div>
+                <div className="flex justify-center flex-wrap gap-2">
   <button
     onClick={() => setBgOffset((o) => ({ ...o, y: o.y - 10 }))}
     disabled={bgScale === 1}
