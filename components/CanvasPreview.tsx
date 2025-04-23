@@ -583,6 +583,7 @@ ctx.drawImage(
     초기화
   </button>
           </div>
+               </div>
         )}
 
         {downloadUrl && (
