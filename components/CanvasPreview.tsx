@@ -527,8 +527,7 @@ ctx.drawImage(
                   초기화
                 </button>
               </div>
-              <div className="mt-5 space-y-2">
- <div className="mt-5 flex flex-wrap justify-center gap-2">
+            <div className="flex flex-col items-center gap-2">
        <span className="text-sm text-gray-600 font-medium">
                 배경 이미지 조절
               </span>
@@ -539,12 +538,17 @@ ctx.drawImage(
   >
     확대
   </button>
-  <button
-    onClick={() => setBgScale((s) => Math.max(s - 0.1, 0.5))}
-    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
-  >
-    축소
-  </button>
+<button
+  onClick={() => {
+    if (bgScale > 1) {
+      setBgScale((s) => Math.max(s - 0.1, 1))
+    }
+  }}
+  disabled={bgScale <= 1}
+  className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+>
+  축소
+</button>
   <button
     onClick={() => setBgOffset((o) => ({ ...o, y: o.y - 10 }))}
     className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
