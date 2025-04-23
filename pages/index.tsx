@@ -126,7 +126,7 @@ export default function Home() {
             >
               {step === 0 ? (
                 <div className="text-center space-y-6">
-                  {!isInAppBrowser && (
+                  {isInAppBrowser && (
                     <p className="text-xs text-red-800 px-4 py-3 border border-red-300 bg-red-50 rounded-3xl animate-pulse">
                       ⚠️ 텔레그램, 인스타그램, 페이스북 등 일부 앱의 내부
                       브라우저에서는 이미지가 정상적으로 다운로드되지 않을 수
