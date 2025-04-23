@@ -96,6 +96,7 @@ export default function Home() {
                         stage: 'started',
                         anonymous_id: localStorage.getItem('anonymous_id'),
                         user_agent: navigator.userAgent,
+                         referrer: document.referrer || null,
                       })
                     } catch (err) {
                       console.error('Supabase 기록 실패:', err)
