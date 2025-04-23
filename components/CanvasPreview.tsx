@@ -528,42 +528,60 @@ ctx.drawImage(
                 </button>
               </div>
               <div className="mt-5 space-y-2">
-  <p className="text-sm text-gray-600 font-medium">배경 조절</p>
-
-  <div className="flex justify-center gap-2">
-    <button
-      onClick={() => setBgScale((s) => Math.min(s + 0.1, 2.5))}
-      className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-    >
-      배경 확대
-    </button>
-    <button
-      onClick={() => setBgScale((s) => Math.max(s - 0.1, 0.5))}
-      className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-    >
-      배경 축소
-    </button>
-  </div>
-
-  <div className="grid grid-cols-3 gap-2 justify-items-center text-lg">
-    <button onClick={() => setBgOffset((o) => ({ ...o, y: o.y - 10 }))}>⬆️</button>
-    <div />
-    <button onClick={() => setBgOffset((o) => ({ ...o, y: o.y + 10 }))}>⬇️</button>
-    <button onClick={() => setBgOffset((o) => ({ ...o, x: o.x - 10 }))}>⬅️</button>
-    <div />
-    <button onClick={() => setBgOffset((o) => ({ ...o, x: o.x + 10 }))}>➡️</button>
-  </div>
-
+ <div className="mt-5 flex flex-wrap justify-center gap-2">
+       <span className="text-sm text-gray-600 font-medium">
+                배경 이미지 조절
+              </span>
+                 <div className="flex justify-center gap-3">
+  <button
+    onClick={() => setBgScale((s) => Math.min(s + 0.1, 2.5))}
+    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+  >
+    확대
+  </button>
+  <button
+    onClick={() => setBgScale((s) => Math.max(s - 0.1, 0.5))}
+    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+  >
+    축소
+  </button>
+  <button
+    onClick={() => setBgOffset((o) => ({ ...o, y: o.y - 10 }))}
+    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+  >
+    ⬆️
+  </button>
+  <button
+    onClick={() => setBgOffset((o) => ({ ...o, y: o.y + 10 }))}
+    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+  >
+    ⬇️
+  </button>
+  <button
+    onClick={() => setBgOffset((o) => ({ ...o, x: o.x - 10 }))}
+    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+  >
+    ⬅️
+  </button>
+  <button
+    onClick={() => setBgOffset((o) => ({ ...o, x: o.x + 10 }))}
+    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+  >
+    ➡️
+  </button>
   <button
     onClick={() => {
       setBgScale(1)
       setBgOffset({ x: 0, y: 0 })
     }}
-    className="w-full mt-2 px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg bg-white hover:bg-gray-100 transition"
+    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
   >
-    배경 초기화
+    초기화
   </button>
+                   
 </div>
+</div>
+
 
             </div>
           </div>
