@@ -475,9 +475,9 @@ ctx.drawImage(
             <div className="absolute inset-0 border-2 border-blue-500 pointer-events-none rounded opacity-75" />
           )}
         </div>
+          <div className="mt-4 space-y-3">
 
         {!isFullAsset && (
-          <div className="mt-4 space-y-3">
             <div className="flex flex-col items-center gap-1">
               <label
                 htmlFor="scale-slider"
@@ -529,7 +529,8 @@ ctx.drawImage(
               
               </div>
               </div>
-              <div className="flex flex-col items-center gap-2">
+             
+        )} <div className="flex flex-col items-center gap-2">
        <span className="text-sm text-gray-600 font-medium">
                 배경 이미지 조절
               </span>
@@ -592,7 +593,6 @@ ctx.drawImage(
           </div>
                </div>
               </div>
-        )}
 
         {downloadUrl && (
           <div className="mt-5 space-y-3">
