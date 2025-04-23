@@ -569,7 +569,7 @@ export default function CanvasPreview({
                   setBgScale(1)
                   setBgOffset({ x: 0, y: 0 })
                 }}
-                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition "
               >
                 초기화
               </button>
@@ -578,7 +578,7 @@ export default function CanvasPreview({
               <button
                 onClick={() => setBgOffset((o) => ({ ...o, y: o.y - 10 }))}
                 disabled={bgScale === 1}
-                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="배경 위로 이동"
               >
                 ⬆️
@@ -586,7 +586,7 @@ export default function CanvasPreview({
               <button
                 onClick={() => setBgOffset((o) => ({ ...o, y: o.y + 10 }))}
                 disabled={bgScale === 1}
-                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="배경 아래로 이동"
               >
                 ⬇️
@@ -594,7 +594,7 @@ export default function CanvasPreview({
               <button
                 onClick={() => setBgOffset((o) => ({ ...o, x: o.x - 10 }))}
                 disabled={bgScale === 1}
-                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="배경 왼쪽으로 이동"
               >
                 ⬅️
@@ -602,7 +602,7 @@ export default function CanvasPreview({
               <button
                 onClick={() => setBgOffset((o) => ({ ...o, x: o.x + 10 }))}
                 disabled={bgScale === 1}
-                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="배경 오른쪽으로 이동"
               >
                 ➡️
