@@ -11,6 +11,7 @@ export default function Home() {
   const [step, setStep] = useState<0 | 1 | 2>(0)
   const [image, setImage] = useState<File | null>(null)
   const [overlayFile, setOverlayFile] = useState('asset01.png')
+  const [isInAppBrowser, setIsInAppBrowser] = useState(false)
 
   useEffect(() => {
     if (!localStorage.getItem('anonymous_id')) {
@@ -27,6 +28,14 @@ export default function Home() {
 
     return () => clearTimeout(timeout)
   }, [step])
+
+  useEffect(() => {
+    const ua = navigator.userAgent.toLowerCase()
+    const inAppPatterns = ['instagram', 'fbav', 'fb_iab', 'fban', 'telegram']
+
+    const isInApp = inAppPatterns.some((pattern) => ua.includes(pattern))
+    setIsInAppBrowser(isInApp)
+  }, [])
 
   return (
     <>
@@ -78,63 +87,87 @@ export default function Home() {
 
         {/* 본문 */}
         <main className="w-full max-w-[420px] mx-auto px-4 pt-[100px] pb-[20px] bg-white">
-          {step === 0 ? (
-            <div className="text-center space-y-6">
-              <div className="bg-white border border-[#84C0D3] rounded-2xl px-6 py-8">
-                <h1 className="text-xl font-bold text-[#415E9A] mb-2 ">
-                  수호동지 프로필 꾸미기!
-                </h1>
-                <p className="text-sm text-gray-700 leading-relaxed">
-                  프로필 사진에 무지개 아이템을 추가해
-                  <br />
-                  성소수자에 대한 지지를 표현해주세요!
-                </p>
-                <button
-                  onClick={async () => {
-                    try {
-                      await supabase.from('image_creations').insert({
-                        stage: 'started',
-                        anonymous_id: localStorage.getItem('anonymous_id'),
-                        user_agent: navigator.userAgent,
-                         referrer: document.referrer || null,
-                      })
-                    } catch (err) {
-                      console.error('Supabase 기록 실패:', err)
-                    } finally {
-                      setStep(1)
-                    }
-                  }}
-                  className="mt-6 px-5 py-2 text-white text-sm bg-[rgba(225,168,189,0.9)]
- rounded-full hover:bg-[rgba(225,168,189,1)]  transition"
-                >
-                  <strong>시작하기</strong>
-                </button>
-              </div>
+          <div
+            key={step}
+            className="transition-opacity duration-300 ease-in-out animate-fade"
+          >
+            {step === 0 ? (
+              <div className="text-center space-y-6">
+                {isInAppBrowser && (
+                  <p className="text-xs text-red-800 px-4 py-3 border border-red-300 bg-red-50 rounded-3xl ">
+                    ⚠️ 텔레그램, 인스타그램, 페이스북 등 일부 앱의 내부
+                    브라우저에서는 이미지가 정상적으로 다운로드되지 않을 수
+                    있습니다.{' '}
+                    <a
+                      href={
+                        typeof window !== 'undefined'
+                          ? window.location.href
+                          : '/'
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline text-blue-600 font-medium"
+                    >
+                      외부 브라우저
+                    </a>
+                    (크롬, 사파리 등)에서 다시 접속해 주세요.
+                  </p>
+                )}
+                <div className="bg-white border border-[#84C0D3] rounded-2xl px-6 py-8">
+                  <h1 className="text-xl font-bold text-[#415E9A] mb-2 ">
+                    수호동지 프로필 꾸미기!
+                  </h1>
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    프로필 사진에 무지개 아이템을 추가해
+                    <br />
+                    성소수자에 대한 지지를 표현해주세요!
+                  </p>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await supabase.from('image_creations').insert({
+                          stage: 'started',
+                          anonymous_id: localStorage.getItem('anonymous_id'),
+                          user_agent: navigator.userAgent,
+                          referrer: document.referrer || null,
+                        })
+                      } catch (err) {
+                        console.error('Supabase 기록 실패:', err)
+                      } finally {
+                        setStep(1)
+                      }
+                    }}
+                    className="mt-6 px-5 py-2 text-white text-sm bg-[rgba(225,168,189,0.9)] rounded-full hover:bg-[rgba(225,168,189,1)] transition"
+                  >
+                    <strong>시작하기</strong>
+                  </button>
+                </div>
 
-              <p className="text-xs text-green-800 px-4 py-3 border border-green-300 bg-green-50 rounded-2xl">
-                🔒 이미지는 브라우저에서만 처리되며, 서버에 저장되지 않습니다.
-              </p>
-            </div>
-          ) : step === 1 || !image ? (
-            <Step1_UploadAndSelect
-              image={image}
-              setImage={setImage}
-              overlayFile={overlayFile}
-              setOverlayFile={setOverlayFile}
-              onNext={() => setStep(2)}
-            />
-          ) : (
-            <Step2_PreviewAndDownload
-              image={image!}
-              overlayFile={overlayFile}
-              setOverlayFile={setOverlayFile}
-              onReset={() => {
-                setImage(null)
-                setOverlayFile('asset01.png')
-                setStep(1)
-              }}
-            />
-          )}
+                <p className="text-xs text-green-800 px-4 py-3 border border-green-300 bg-green-50 rounded-2xl">
+                  🔒 이미지는 브라우저에서만 처리되며, 서버에 저장되지 않습니다.
+                </p>
+              </div>
+            ) : step === 1 || !image ? (
+              <Step1_UploadAndSelect
+                image={image}
+                setImage={setImage}
+                overlayFile={overlayFile}
+                setOverlayFile={setOverlayFile}
+                onNext={() => setStep(2)}
+              />
+            ) : (
+              <Step2_PreviewAndDownload
+                image={image!}
+                overlayFile={overlayFile}
+                setOverlayFile={setOverlayFile}
+                onReset={() => {
+                  setImage(null)
+                  setOverlayFile('asset01.png')
+                  setStep(1)
+                }}
+              />
+            )}
+          </div>
         </main>
 
         {/* 고정 푸터 */}
