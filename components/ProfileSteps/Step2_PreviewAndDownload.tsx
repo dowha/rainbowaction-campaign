@@ -21,7 +21,7 @@ type Props = {
   image: File
   overlayFile: string
   setOverlayFile: (file: string) => void
-  onReset: () => void // 👈 추가
+  onReset: () => void
 }
 
 export default function Step2_PreviewAndDownload({
@@ -58,11 +58,11 @@ export default function Step2_PreviewAndDownload({
           block: 'nearest',
         })
       }
-    }, 50) // DOM 렌더링 완료를 기다리기 위한 약간의 딜레이
+    }, 50)
 
     return () => clearTimeout(timeout)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // ← 빈 배열로 최초 진입 시 1회만 실행
+  }, [])
 
   return (
     <div className="w-full">

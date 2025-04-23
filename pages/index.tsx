@@ -221,7 +221,11 @@ export default function Home() {
                 <strong>후원계좌</strong>
               </span>
               <br />
-              <a href="https://aq.gy/f/2K1E%5E" target="_blank" rel="noopener">
+              <a
+                href="https://aq.gy/f/2K1E%5E"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 국민은행 408801-01-317159 성소수자차별반대 무지개행동
               </a>
             </p>

@@ -8,7 +8,6 @@ interface Props {
   onReset?: () => void
 }
 
-// --- Helper functions (outside component) ---
 const getInitialPos = (overlay: string): { x: number; y: number } => {
   if (overlay === 'asset01.png') return { x: 240, y: 30 }
   return { x: 240, y: 240 }
@@ -17,7 +16,6 @@ const getInitialPos = (overlay: string): { x: number; y: number } => {
 const isFullAssetOverlay = (overlay: string): boolean => {
   return ['asset08.png', 'asset09.png', 'asset10.png'].includes(overlay)
 }
-// ---
 
 export default function CanvasPreview({
   image,
@@ -284,14 +282,14 @@ export default function CanvasPreview({
       setIsDragging(false)
       if (isMobile && originalBodyOverflowY.current !== undefined) {
         document.body.style.overflowY = originalBodyOverflowY.current
-        originalBodyOverflowY.current = '' // 참조 초기화
+        originalBodyOverflowY.current = ''
       }
     }
   }, [isDragging, isMobile])
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas || isFullAsset) return // 전체 에셋일 경우 터치 제어 불필요
+    if (!canvas || isFullAsset) return
 
     const touchStartHandler = (e: TouchEvent) => {
       const currentCoords = getCoords(e)
@@ -316,7 +314,7 @@ export default function CanvasPreview({
   }, [getCoords, isWithinOverlay, isDragging, isFullAsset])
 
   const handleRotate = useCallback((degreeDelta: number) => {
-    setRotation((prev) => (prev + degreeDelta + 360) % 360) // 0~359도 유지
+    setRotation((prev) => (prev + degreeDelta + 360) % 360)
   }, [])
 
   const dataURLtoBlob = (dataurl: string): Blob | null => {
@@ -326,7 +324,7 @@ export default function CanvasPreview({
       const match = arr[0].match(/:(.*?);/)
       if (!match) return null
       const mime = match[1]
-      const bstr = atob(arr[arr.length - 1]) // Use arr.length - 1 for robustness
+      const bstr = atob(arr[arr.length - 1])
       let n = bstr.length
       const u8arr = new Uint8Array(n)
       while (n--) {
@@ -351,7 +349,7 @@ export default function CanvasPreview({
       return
     }
 
-    setIsSharing(true) // 👇 공유 시작 표시
+    setIsSharing(true)
 
     const blob = dataURLtoBlob(downloadUrl)
     if (!blob) {
@@ -396,12 +394,11 @@ export default function CanvasPreview({
         alert(`공유 중 오류가 발생했습니다: ${error.message}`)
       }
     } finally {
-      setIsSharing(false) // ✅ 반드시 공유 상태 초기화
+      setIsSharing(false)
     }
   }, [downloadUrl, overlay])
 
   const platformInfo = useMemo(() => {
-    // 서버 사이드 렌더링 또는 window/navigator 없는 환경 방어
     if (typeof window === 'undefined' || typeof navigator === 'undefined') {
       return { isPC: true, isIOS: false, isAndroid: false, canShare: false }
     }
@@ -410,10 +407,9 @@ export default function CanvasPreview({
     const platform = navigator.platform
     const maxTouchPoints = navigator.maxTouchPoints || 0
 
-    // 최신 iPad는 Mac으로 UserAgent를 보낼 수 있으므로 maxTouchPoints도 확인
     const isIOS =
       /iPhone|iPad|iPod/i.test(userAgent) ||
-      (platform === 'MacIntel' && maxTouchPoints > 1) // MSStream 조건 제거
+      (platform === 'MacIntel' && maxTouchPoints > 1)
 
     const isAndroid = /Android/i.test(userAgent)
     const isMobile = isIOS || isAndroid
@@ -424,10 +420,10 @@ export default function CanvasPreview({
       isPC,
       isIOS,
       isAndroid,
-      isMobile, // 편의상 모바일 전체 여부도 추가
+      isMobile,
       canShare,
     }
-  }, []) // 빈 배열: 컴포넌트 마운트 시 한 번만 실행
+  }, [])
 
   const ShareButton = ({ text }: { text: string }) => (
     <button
@@ -442,7 +438,7 @@ export default function CanvasPreview({
 
   const DownloadButton = () => (
     <a
-      href={downloadUrl!} // downloadUrl이 있을 때만 렌더링되므로 ! 사용 가능 (또는 조건부 렌더링 확인)
+      href={downloadUrl!}
       download="rainbowaction-profile.png"
       onClick={onDownload}
       className={`block no-underline hover:no-underline w-full text-center px-4 py-2.5 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 hover:text-white transition border border-gray-800 ${
@@ -478,6 +474,8 @@ export default function CanvasPreview({
             onTouchMove={handleInteractionMove}
             onTouchEnd={handleInteractionEnd}
             onTouchCancel={handleInteractionEnd}
+            role="img"
+            aria-label="꾸며진 프로필 이미지 미리보기"
             className={`block w-full max-w-full border border-gray-300 rounded bg-white ${
               isFullAsset ? 'cursor-default' : 'cursor-move'
             } transition-all duration-200 ease-out`}
@@ -488,7 +486,6 @@ export default function CanvasPreview({
           )}
         </div>
         <div className="mt-4 space-y-4">
-          {/* 1. 에셋 조절: isFullAsset이 아닐 때만 */}
           {!isFullAsset && (
             <>
               <div className="flex flex-col items-center gap-2">
@@ -545,7 +542,6 @@ export default function CanvasPreview({
             </>
           )}
 
-          {/* 2. 배경 조절: 항상 노출 */}
           <div className="flex flex-col items-center gap-2">
             <span className="text-sm text-gray-600 font-medium">
               배경 이미지 조절
@@ -583,6 +579,7 @@ export default function CanvasPreview({
                 onClick={() => setBgOffset((o) => ({ ...o, y: o.y - 10 }))}
                 disabled={bgScale === 1}
                 className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                aria-label="배경 위로 이동"
               >
                 ⬆️
               </button>
@@ -590,6 +587,7 @@ export default function CanvasPreview({
                 onClick={() => setBgOffset((o) => ({ ...o, y: o.y + 10 }))}
                 disabled={bgScale === 1}
                 className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                aria-label="배경 아래로 이동"
               >
                 ⬇️
               </button>
@@ -597,6 +595,7 @@ export default function CanvasPreview({
                 onClick={() => setBgOffset((o) => ({ ...o, x: o.x - 10 }))}
                 disabled={bgScale === 1}
                 className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                aria-label="배경 왼쪽으로 이동"
               >
                 ⬅️
               </button>
@@ -604,6 +603,7 @@ export default function CanvasPreview({
                 onClick={() => setBgOffset((o) => ({ ...o, x: o.x + 10 }))}
                 disabled={bgScale === 1}
                 className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                aria-label="배경 오른쪽으로 이동"
               >
                 ➡️
               </button>
@@ -615,23 +615,18 @@ export default function CanvasPreview({
           <div className="mt-5 space-y-3">
             <hr />
 
-            {/* PC 환경 렌더링 */}
             {platformInfo.isPC && (
               <>
                 <DownloadButton />
-                {/* PC에서도 공유 기능 지원 시 버튼 노출 */}
                 {platformInfo.canShare && <ShareButton text="공유하기" />}
               </>
             )}
 
-            {/* iOS 모바일 환경 렌더링 */}
             {platformInfo.isIOS && (
               <>
-                {/* iOS는 공유가 핵심이므로 공유 버튼 먼저 (사진첩 저장 안내 포함) */}
                 {platformInfo.canShare && (
                   <ShareButton text="공유하기(사진첩 저장하기)" />
                 )}
-                {/* iOS에서도 파일 다운로드 옵션 제공 */}
                 <DownloadButton />
                 <p className="text-xs text-center text-gray-500 mt-3">
                   일부 앱 내 브라우저에서는 다운로드가 제한될 수 있어요.
@@ -651,10 +646,8 @@ export default function CanvasPreview({
               </>
             )}
 
-            {/* Android 모바일 환경 렌더링 */}
             {platformInfo.isAndroid && (
               <>
-                {/* Android 공유 버튼 */}
                 {platformInfo.canShare && (
                   <ShareButton text="공유하기(이미지 복사하기)" />
                 )}
