@@ -526,7 +526,10 @@ ctx.drawImage(
                 >
                   초기화
                 </button>
-                 <div className="flex flex-col items-center gap-2">
+              
+              </div>
+              </div>
+              <div className="flex flex-col items-center gap-2">
        <span className="text-sm text-gray-600 font-medium">
                 배경 이미지 조절
               </span>
@@ -585,11 +588,8 @@ ctx.drawImage(
   >
     초기화
   </button>
-              </div>
-           
           </div>
                </div>
-              </div>
               </div>
         )}
 
