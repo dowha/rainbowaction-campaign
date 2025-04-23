@@ -97,7 +97,7 @@ export default function Home() {
       >
         {/* Fixed Header */}
         <header className="sticky top-0 z-50 w-full">
-          <div className="max-w-[420px] mx-auto h-20 relative py-5 bg-white border-b border-[#E1A8BD]">
+          <div className="max-w-[420px] mx-auto h-20 relative py-5 bg-white">
             <Image
               src="/logo.png"
               alt="로고"
@@ -113,12 +113,8 @@ export default function Home() {
         </header>
 
         {/* Main content area */}
-        <main
-          className="flex-1 w-full max-w-[420px] mx-auto bg-white flex flex-col" // Added flex flex-col here if content needs vertical alignment control
-        >
-          {/* Inner container for padding and content flow */}
-          <div className="w-full px-4 pt-[20px] pb-[40px]">
-            {/* Content based on step */}
+        <main className="flex-1 min-h-0 w-full max-w-[420px] mx-auto bg-white flex flex-col border-t border-[#E1A8BD]">
+          <div className="w-full px-4 pt-4 pb-6 flex-grow">
             <div
               key={step}
               className="transition-opacity duration-300 ease-in-out animate-fade"
@@ -205,9 +201,8 @@ export default function Home() {
         </main>
 
         {/* Footer */}
-        <footer className="w-full">
-          <div className="max-w-[420px] mx-auto text-center text-sm text-gray-400 bg-white">
-            {/* Campaign Banner */}
+        <footer className="w-full mt-auto">
+          <div className="max-w-[420px] mx-auto text-center text-sm text-gray-400 bg-white py-3">
             <div className="w-full bg-[#F1F5FF] text-[#415E9A] leading-tight text-center py-4 px-4 border-y border-[#84C0D3] font-medium tracking-tight">
               전체 캠페인 정보는{' '}
               <a
