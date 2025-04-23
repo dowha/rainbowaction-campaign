@@ -361,11 +361,13 @@ export default function CanvasPreview({
     const file = new File([blob], 'rainbowaction-profile.png', {
       type: 'image/png',
     })
+
+    const shareUrl = 'https://profile.rainbowaction.kr/?ref=share'
     const shareData = {
       files: [file],
-      title: '캠페인 이미지',
+      title: '나의 수호동지 프로필',
       text: '나의 수호동지 프로필 이미지를 공유합니다!',
-      url: 'https://profile.rainbowaction.kr/',
+      url: shareUrl,
     }
 
     try {
@@ -641,7 +643,7 @@ export default function CanvasPreview({
                   >
                     외부 브라우저
                   </a>
-                  에서 다시 접속해 주세요.
+                  에서 다시 접속해주세요.
                 </p>
               </>
             )}
