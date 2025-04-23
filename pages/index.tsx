@@ -93,7 +93,7 @@ export default function Home() {
       {/* Outermost container: sets flex column, min height, and background */}
       <div
         className="flex flex-col min-h-screen bg-center bg-cover bg-no-repeat"
-        style={{ backgroundImage: "url('/bg.png')" }}
+        style={{ backgroundImage: "url('/bg.png')", minHeight: '100dvh' }}
       >
         {/* Fixed Header */}
         <header className="sticky top-0 z-50 w-full">

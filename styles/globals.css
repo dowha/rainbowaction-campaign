@@ -10,13 +10,20 @@
   --foreground: #171717;
 }
 
+html,
+body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  overflow-x: hidden;
+}
+
 /* ✅ 기본 바디 스타일 */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: 'Pretendard', sans-serif;
   word-break: keep-all; /* ✅ 줄바꿈 시 단어 단위 유지 */
-  margin: 0;
 }
 
 /* ✅ 링크 스타일 개선 */
