@@ -40,8 +40,6 @@ export default function Step1_UploadAndSelect({
   }, [])
 
   const handleProceed = async () => {
-    // 이벤트 버블링 방지 처리는 버튼 자체의 onClick에서 해야 합니다.
-    // 여기서는 원래 로직만 수행합니다.
     await supabase.from('image_creations').insert({
       asset: overlayFile,
       anonymous_id: localStorage.getItem('anonymous_id'),
