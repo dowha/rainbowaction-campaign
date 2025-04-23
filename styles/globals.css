@@ -16,6 +16,7 @@ body {
   color: var(--foreground);
   font-family: 'Pretendard', sans-serif;
   word-break: keep-all; /* ✅ 줄바꿈 시 단어 단위 유지 */
+  margin: 0;
 }
 
 /* ✅ 링크 스타일 개선 */

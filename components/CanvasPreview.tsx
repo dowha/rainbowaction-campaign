@@ -458,9 +458,12 @@ export default function CanvasPreview({
   return (
     <div className="mt-1 text-center select-none">
       <div className="mx-auto w-full max-w-[360px] overflow-hidden bg-gray-50 border border-gray-200 rounded-2xl px-4 py-5">
-        {isMobile && !isFullAsset && (
+        {!isFullAsset && (
           <p className="mb-2 text-xs text-gray-500">
-            📍 스티커를 길게(1초 이상) 누르면 이동할 수 있어요!
+            📌{' '}
+            {isMobile
+              ? '스티커를 꾹(1초 이상) 눌러 마음에 드는 위치로 옮겨보세요!'
+              : '스티커를 마우스로 드래그해 마음에 드는 위치로 옮겨보세요!'}
           </p>
         )}
 
