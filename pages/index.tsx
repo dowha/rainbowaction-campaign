@@ -31,8 +31,30 @@ export default function Home() {
 
   useEffect(() => {
     const ua = navigator.userAgent.toLowerCase()
-    const inAppPatterns = ['instagram', 'fbav', 'fb_iab', 'fban', 'telegram']
-
+    const inAppPatterns = [
+      'instagram',
+      'fbav',
+      'fb_iab',
+      'fban',
+      'twitter',
+      'tiktok',
+      'pinterest',
+      'reddit',
+      'linkedin',
+      'telegram',
+      'telegrambot',
+      'slack',
+      'line',
+      'kakaotalk',
+      'wechat',
+      'whatsapp',
+      'messenger',
+      'naver',
+      'daum',
+      'youtube',
+      'snapchat',
+      'discord',
+    ]
     const isInApp = inAppPatterns.some((pattern) => ua.includes(pattern))
     setIsInAppBrowser(isInApp)
   }, [])
@@ -43,12 +65,12 @@ export default function Home() {
         <title>수호동지 프로필 꾸미기</title>
         <meta
           name="description"
-          content="무지개 아이템으로 수호동지 프로필 사진을 꾸며보세요!"
+          content="프로필 사진에 무지개 아이템을 추가해 성소수자에 대한 지지를 표현해주세요."
         />
         <meta property="og:title" content="수호동지 프로필 꾸미기" />
         <meta
           property="og:description"
-          content="무지개 아이템으로 수호동지 프로필 사진을 꾸며보세요!"
+          content="프로필 사진에 무지개 아이템을 추가해 성소수자에 대한 지지를 표현해주세요."
         />
         <meta
           property="og:image"
@@ -59,7 +81,7 @@ export default function Home() {
         <meta name="twitter:title" content="수호동지 프로필 꾸미기" />
         <meta
           name="twitter:description"
-          content="무지개 아이템으로 수호동지 프로필 사진을 꾸며보세요!"
+          content="프로필 사진에 무지개 아이템을 추가해 성소수자에 대한 지지를 표현해주세요."
         />
         <meta
           name="twitter:image"
@@ -70,7 +92,7 @@ export default function Home() {
       <div className="min-h-screen bg-gray-100 text-sm">
         {/* 고정 헤더 */}
         <header className="fixed top-0 w-full z-50 bg-gray-100">
-          <div className="max-w-[420px] mx-auto bg-white border-b py-5 relative h-20">
+          <div className="max-w-[420px] mx-auto bg-white border-b border-[#E1A8BD] py-5 relative h-20">
             <Image
               src="/logo.png"
               alt="로고"
@@ -94,7 +116,7 @@ export default function Home() {
             {step === 0 ? (
               <div className="text-center space-y-6">
                 {isInAppBrowser && (
-                  <p className="text-xs text-red-800 px-4 py-3 border border-red-300 bg-red-50 rounded-3xl ">
+                  <p className="text-xs text-red-800 px-4 py-3 border border-red-300 bg-red-50 rounded-3xl animate-pulse">
                     ⚠️ 텔레그램, 인스타그램, 페이스북 등 일부 앱의 내부
                     브라우저에서는 이미지가 정상적으로 다운로드되지 않을 수
                     있습니다.{' '}
@@ -137,7 +159,7 @@ export default function Home() {
                         setStep(1)
                       }
                     }}
-                    className="mt-6 px-5 py-2 text-white text-sm bg-[rgba(225,168,189,0.9)] rounded-full hover:bg-[rgba(225,168,189,1)] transition"
+                    className="mt-6 px-5 py-2 text-white text-sm bg-[#415E9A] hover:bg-[#84C0D3] transition"
                   >
                     <strong>시작하기</strong>
                   </button>
@@ -209,11 +231,11 @@ export default function Home() {
               </a>
               .
             </p>
-            <p className="text-xs pb-4">
+            <p className="text-[#E1A8BD] text-xs pb-4">
               Made with ♥ by{' '}
               <a
                 href="https://dowha.kim"
-                className="text-gray-400 no-underline"
+                className="text-[#E1A8BD] no-underline"
                 target="_blank"
               >
                 Dowha

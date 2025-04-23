@@ -313,7 +313,7 @@ export default function Uploader({ onSelect, onClear }: Props) {
                   !cameraError && ( // 스트리밍 중이고 에러 없을 때만 촬영 버튼 활성화
                     <button
                       onClick={takePhoto}
-                      className="px-5 py-3 rounded-full bg-blue-600 text-white text-sm hover:bg-blue-500 shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
+                      className="px-5 py-3 rounded-full bg-[#415E9A] text-white text-sm hover:bg-[#84C0D3] shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
                       aria-label="사진 촬영"
                     >
                       <svg
@@ -341,7 +341,7 @@ export default function Uploader({ onSelect, onClear }: Props) {
                 {captured && ( // 캡처 완료 시 다시 찍기 버튼
                   <button
                     onClick={handleRetake} // 다시 찍기 함수 연결
-                    className="p-3 rounded-full bg-gray-600 text-white hover:bg-gray-500 shadow focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75" // 패딩 조정 및 원형으로 변경
+                    className="p-3 rounded-full bg-gray-600 text-white hover:bg-[#e1a8bd] shadow focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75" // 패딩 조정 및 원형으로 변경
                     aria-label="다시 찍기" // 접근성을 위한 레이블
                   >
                     {/* Heroicon: ArrowPath (Outline) */}

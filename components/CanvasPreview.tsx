@@ -436,7 +436,7 @@ export default function CanvasPreview({
       disabled={isSharing}
       className="block no-underline hover:no-underline w-full text-center px-4 py-2.5 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition border border-blue-600 disabled:opacity-60 disabled:cursor-wait"
     >
-      {isSharing ? '공유 준비 중...' : text}
+      <strong>{isSharing ? '공유 준비 중...' : text}</strong>
     </button>
   )
 
@@ -445,12 +445,12 @@ export default function CanvasPreview({
       href={downloadUrl!} // downloadUrl이 있을 때만 렌더링되므로 ! 사용 가능 (또는 조건부 렌더링 확인)
       download="rainbowaction-profile.png"
       onClick={onDownload}
-      className={`block no-underline hover:no-underline w-full text-center px-4 py-2.5 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition border border-gray-800 ${
+      className={`block no-underline hover:no-underline w-full text-center px-4 py-2.5 text-sm text-white bg-gray-800 rounded-lg hover:bg-gray-700 hover:text-white transition border border-gray-800 ${
         isSharing ? 'opacity-60 pointer-events-none' : 'cursor-pointer'
       }`}
       aria-disabled={isSharing}
     >
-      이미지 다운로드
+      <strong>이미지 다운로드</strong>
     </a>
   )
 
@@ -481,14 +481,14 @@ export default function CanvasPreview({
             style={{ touchAction: isFullAsset ? 'auto' : 'manipulation' }}
           />
           {isDragging && (
-            <div className="absolute inset-0 border-2 border-blue-500 pointer-events-none rounded opacity-75" />
+            <div className="absolute inset-0 border-2 border-[#e1a8bd] pointer-events-none rounded opacity-75" />
           )}
         </div>
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 space-y-4">
           {/* 1. 에셋 조절: isFullAsset이 아닐 때만 */}
           {!isFullAsset && (
             <>
-              <div className="flex flex-col items-center gap-1">
+              <div className="flex flex-col items-center gap-2">
                 <label
                   htmlFor="scale-slider"
                   className="text-sm text-gray-600 font-medium"
@@ -631,7 +631,8 @@ export default function CanvasPreview({
                 {/* iOS에서도 파일 다운로드 옵션 제공 */}
                 <DownloadButton />
                 <p className="text-xs text-center text-gray-500 mt-3">
-                  일부 앱 내 브라우저에서는 다운로드가 제한될 수 있어요.{' '}
+                  일부 앱 내 브라우저에서는 다운로드가 제한될 수 있어요.
+                  <br />
                   <a
                     href={
                       typeof window !== 'undefined' ? window.location.href : '/'
@@ -652,11 +653,12 @@ export default function CanvasPreview({
               <>
                 {/* Android 공유 버튼 */}
                 {platformInfo.canShare && (
-                  <ShareButton text="공유하기(이미지 복사)" />
+                  <ShareButton text="공유하기(이미지 복사하기)" />
                 )}
                 <DownloadButton />
                 <p className="text-xs text-center text-gray-500 mt-3">
-                  일부 앱 내 브라우저에서는 다운로드가 제한될 수 있어요.{' '}
+                  일부 앱 내 브라우저에서는 다운로드가 제한될 수 있어요.
+                  <br />
                   <a
                     href={
                       typeof window !== 'undefined' ? window.location.href : '/'
