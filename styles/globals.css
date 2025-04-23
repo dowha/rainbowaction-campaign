@@ -56,3 +56,20 @@ a:hover {
   /* Firefox 스크롤바 색상 (핸들색 트랙색) - 위 Webkit 색상과 유사하게 조정 */
   scrollbar-color: #d1d5db #f1f1f1;
 }
+
+@layer utilities {
+  @keyframes fade {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade {
+    animation: fade 0.5s ease-in-out both;
+  }
+}

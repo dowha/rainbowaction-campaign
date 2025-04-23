@@ -631,9 +631,7 @@ export default function CanvasPreview({
                 {/* iOS에서도 파일 다운로드 옵션 제공 */}
                 <DownloadButton />
                 <p className="text-xs text-center text-gray-500 mt-3">
-                  텔레그램, 인스타그램, 페이스북 등 일부 앱의 내부
-                  브라우저에서는 이미지가 정상적으로 다운로드되지 않을 수
-                  있습니다. <br className="sm:hidden" />
+                  일부 앱 내 브라우저에서는 다운로드가 제한될 수 있어요.{' '}
                   <a
                     href={
                       typeof window !== 'undefined' ? window.location.href : '/'
@@ -642,9 +640,9 @@ export default function CanvasPreview({
                     rel="noopener noreferrer"
                     className="underline text-blue-600 font-medium"
                   >
-                    외부 브라우저(크롬, 사파리 등)
+                    외부 브라우저
                   </a>
-                  에서 열어주세요.
+                  에서 다시 접속해 주세요.
                 </p>
               </>
             )}
@@ -653,12 +651,12 @@ export default function CanvasPreview({
             {platformInfo.isAndroid && (
               <>
                 {/* Android 공유 버튼 */}
-                {platformInfo.canShare && <ShareButton text="공유하기" />}
+                {platformInfo.canShare && (
+                  <ShareButton text="공유하기(이미지 복사)" />
+                )}
                 <DownloadButton />
                 <p className="text-xs text-center text-gray-500 mt-3">
-                  텔레그램, 인스타그램, 페이스북 등 일부 앱의 내부
-                  브라우저에서는 이미지가 정상적으로 다운로드되지 않을 수
-                  있습니다. <br className="sm:hidden" />
+                  일부 앱 내 브라우저에서는 다운로드가 제한될 수 있어요.{' '}
                   <a
                     href={
                       typeof window !== 'undefined' ? window.location.href : '/'
@@ -667,9 +665,9 @@ export default function CanvasPreview({
                     rel="noopener noreferrer"
                     className="underline text-blue-600 font-medium"
                   >
-                    외부 브라우저(크롬, 사파리 등)
+                    외부 브라우저
                   </a>
-                  에서 열어주세요.
+                  에서 다시 접속해 주세요.
                 </p>
               </>
             )}

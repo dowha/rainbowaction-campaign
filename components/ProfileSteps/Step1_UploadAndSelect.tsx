@@ -66,7 +66,7 @@ export default function Step1_UploadAndSelect({
 
       {image && (
         <>
-          <div className="grid grid-cols-2 gap-3 my-6">
+          <div className="grid grid-cols-2 gap-3 my-6 animate-fade">
             {labels.map((label, i) => {
               const asset = `asset${String(i + 1).padStart(2, '0')}.png`
               const selected = overlayFile === asset
