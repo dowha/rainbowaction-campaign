@@ -32,6 +32,9 @@ export default function CanvasPreview({
   const [rotation, setRotation] = useState<number>(0)
   const [isDragging, setIsDragging] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
+  const [bgScale, setBgScale] = useState(1)
+const [bgOffset, setBgOffset] = useState({ x: 0, y: 0 })
+
 
   const dragStartOffset = useRef({ x: 0, y: 0 })
   const longPressTimer = useRef<NodeJS.Timeout | null>(null)
@@ -69,17 +72,18 @@ export default function CanvasPreview({
         const shortSide = Math.min(baseImage.width, baseImage.height)
         const sx = (baseImage.width - shortSide) / 2
         const sy = (baseImage.height - shortSide) / 2
-        ctx.drawImage(
-          baseImage,
-          sx,
-          sy,
-          shortSide,
-          shortSide,
-          0,
-          0,
-          exportSize,
-          exportSize
-        )
+      const scaledSize = exportSize * bgScale
+ctx.drawImage(
+  baseImage,
+  sx,
+  sy,
+  shortSide,
+  shortSide,
+  (exportSize - scaledSize) / 2 + bgOffset.x,
+  (exportSize - scaledSize) / 2 + bgOffset.y,
+  scaledSize,
+  scaledSize
+)
 
         if (isFullAsset) {
           ctx.drawImage(overlayImg, 0, 0, exportSize, exportSize)
@@ -142,7 +146,7 @@ export default function CanvasPreview({
         document.body.style.overflowY = originalBodyOverflowY.current
       }
     }
-  }, [image, overlay, overlayPos, scale, rotation, isFullAsset, isMobile])
+  }, [image, overlay, overlayPos, scale, rotation, isFullAsset, isMobile, bgScale, bgOffset])
 
   const getCoords = useCallback(
     (e: MouseEvent | TouchEvent): { x: number; y: number } | null => {
@@ -447,7 +451,7 @@ export default function CanvasPreview({
       <div className="mx-auto w-full max-w-[360px] overflow-hidden bg-gray-50 border border-gray-200 rounded-2xl px-4 py-5">
         {isMobile && !isFullAsset && (
           <p className="mb-2 text-xs text-gray-500">
-            📍 에셋을 길게(1초) 누르면 이동할 수 있어요!
+            📍 에셋을 길게(1초 이상) 누르면 이동할 수 있어요!
           </p>
         )}
 
@@ -479,7 +483,7 @@ export default function CanvasPreview({
                 htmlFor="scale-slider"
                 className="text-sm text-gray-600 font-medium"
               >
-                크기 조절
+                에셋 크기 조절
               </label>
               <input
                 id="scale-slider"
@@ -494,7 +498,7 @@ export default function CanvasPreview({
             </div>
             <div className="flex flex-col items-center gap-2">
               <span className="text-sm text-gray-600 font-medium">
-                이미지 회전
+                에셋 회전
               </span>
               <div className="flex justify-center gap-3">
                 <button
@@ -522,9 +526,72 @@ export default function CanvasPreview({
                 >
                   초기화
                 </button>
+              
               </div>
-            </div>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+       <span className="text-sm text-gray-600 font-medium">
+                배경 이미지 조절
+              </span>
+                 <div className="flex justify-center gap-3">
+  <button
+    onClick={() => setBgScale((s) => Math.min(s + 0.1, 2.5))}
+    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+  >
+    + 확대
+  </button>
+<button
+  onClick={() => {
+    if (bgScale > 1) {
+      setBgScale((s) => Math.max(s - 0.1, 1))
+    }
+  }}
+  disabled={bgScale <= 1}
+  className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+>
+  - 축소
+</button>
+                     <button
+    onClick={() => {
+      setBgScale(1)
+      setBgOffset({ x: 0, y: 0 })
+    }}
+    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+  >
+    초기화
+  </button> </div>
+                <div className="flex justify-center flex-wrap gap-2">
+  <button
+    onClick={() => setBgOffset((o) => ({ ...o, y: o.y - 10 }))}
+    disabled={bgScale === 1}
+    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+  >
+    ⬆️
+  </button>
+  <button
+    onClick={() => setBgOffset((o) => ({ ...o, y: o.y + 10 }))}
+    disabled={bgScale === 1}
+    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+  >
+    ⬇️
+  </button>
+  <button
+    onClick={() => setBgOffset((o) => ({ ...o, x: o.x - 10 }))}
+    disabled={bgScale === 1}
+    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+  >
+    ⬅️
+  </button>
+  <button
+    onClick={() => setBgOffset((o) => ({ ...o, x: o.x + 10 }))}
+    disabled={bgScale === 1}
+    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+  >
+    ➡️
+  </button>
           </div>
+               </div>
+              </div>
         )}
 
         {downloadUrl && (
