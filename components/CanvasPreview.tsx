@@ -657,16 +657,7 @@ export default function CanvasPreview({
                 <p className="text-xs text-center text-gray-500 mt-3">
                   일부 앱 내 브라우저에서는 다운로드가 제한될 수 있어요.
                   <br />
-                  <a
-                    href={
-                      typeof window !== 'undefined' ? window.location.href : '/'
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline text-blue-600 font-medium"
-                  >
-                    외부 브라우저
-                  </a>
+                  <strong>외부 브라우저</strong>
                   에서 다시 접속해 주세요.
                 </p>
               </>
