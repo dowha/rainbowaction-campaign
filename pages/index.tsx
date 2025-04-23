@@ -132,19 +132,8 @@ export default function Home() {
                       브라우저에서는 이미지가 정상적으로 다운로드되지 않을 수
                       있습니다.
                       <br />
-                      <a
-                        href={
-                          typeof window !== 'undefined'
-                            ? window.location.href
-                            : '/'
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline text-blue-600 font-medium"
-                      >
-                        외부 브라우저
-                      </a>
-                      (크롬, 사파리 등)에서 <strong>다시</strong> 접속해주세요.
+                      <strong>외부 브라우저</strong>(크롬, 사파리 등)에서{' '}
+                      <strong>다시</strong> 접속해주세요.
                     </p>
                   )}
                   <div className="bg-white border border-[#84C0D3] rounded-2xl px-6 py-8">
