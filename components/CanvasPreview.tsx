@@ -33,8 +33,7 @@ export default function CanvasPreview({
   const [isDragging, setIsDragging] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
   const [bgScale, setBgScale] = useState(1)
-const [bgOffset, setBgOffset] = useState({ x: 0, y: 0 })
-
+  const [bgOffset, setBgOffset] = useState({ x: 0, y: 0 })
 
   const dragStartOffset = useRef({ x: 0, y: 0 })
   const longPressTimer = useRef<NodeJS.Timeout | null>(null)
@@ -72,18 +71,18 @@ const [bgOffset, setBgOffset] = useState({ x: 0, y: 0 })
         const shortSide = Math.min(baseImage.width, baseImage.height)
         const sx = (baseImage.width - shortSide) / 2
         const sy = (baseImage.height - shortSide) / 2
-      const scaledSize = exportSize * bgScale
-ctx.drawImage(
-  baseImage,
-  sx,
-  sy,
-  shortSide,
-  shortSide,
-  (exportSize - scaledSize) / 2 + bgOffset.x,
-  (exportSize - scaledSize) / 2 + bgOffset.y,
-  scaledSize,
-  scaledSize
-)
+        const scaledSize = exportSize * bgScale
+        ctx.drawImage(
+          baseImage,
+          sx,
+          sy,
+          shortSide,
+          shortSide,
+          (exportSize - scaledSize) / 2 + bgOffset.x,
+          (exportSize - scaledSize) / 2 + bgOffset.y,
+          scaledSize,
+          scaledSize
+        )
 
         if (isFullAsset) {
           ctx.drawImage(overlayImg, 0, 0, exportSize, exportSize)
@@ -146,7 +145,17 @@ ctx.drawImage(
         document.body.style.overflowY = originalBodyOverflowY.current
       }
     }
-  }, [image, overlay, overlayPos, scale, rotation, isFullAsset, isMobile, bgScale, bgOffset])
+  }, [
+    image,
+    overlay,
+    overlayPos,
+    scale,
+    rotation,
+    isFullAsset,
+    isMobile,
+    bgScale,
+    bgOffset,
+  ])
 
   const getCoords = useCallback(
     (e: MouseEvent | TouchEvent): { x: number; y: number } | null => {
@@ -451,7 +460,7 @@ ctx.drawImage(
       <div className="mx-auto w-full max-w-[360px] overflow-hidden bg-gray-50 border border-gray-200 rounded-2xl px-4 py-5">
         {isMobile && !isFullAsset && (
           <p className="mb-2 text-xs text-gray-500">
-            📍 에셋을 길게(1초 이상) 누르면 이동할 수 있어요!
+            📍 스티커를 길게(1초 이상) 누르면 이동할 수 있어요!
           </p>
         )}
 
@@ -475,126 +484,129 @@ ctx.drawImage(
             <div className="absolute inset-0 border-2 border-blue-500 pointer-events-none rounded opacity-75" />
           )}
         </div>
-         <div className="mt-4 space-y-3">
-  {/* 1. 에셋 조절: isFullAsset이 아닐 때만 */}
-  {!isFullAsset && (
-    <>
-      <div className="flex flex-col items-center gap-1">
-        <label
-          htmlFor="scale-slider"
-          className="text-sm text-gray-600 font-medium"
-        >
-          에셋 크기 조절
-        </label>
-        <input
-          id="scale-slider"
-          type="range"
-          min="0.5"
-          max="3"
-          step="0.05"
-          value={scale}
-          onChange={(e) => setScale(parseFloat(e.target.value))}
-          className="w-full h-6 accent-blue-600 touch-pan-y cursor-pointer"
-        />
-      </div>
+        <div className="mt-4 space-y-3">
+          {/* 1. 에셋 조절: isFullAsset이 아닐 때만 */}
+          {!isFullAsset && (
+            <>
+              <div className="flex flex-col items-center gap-1">
+                <label
+                  htmlFor="scale-slider"
+                  className="text-sm text-gray-600 font-medium"
+                >
+                  스티커 크기 조절
+                </label>
+                <input
+                  id="scale-slider"
+                  type="range"
+                  min="0.5"
+                  max="3"
+                  step="0.05"
+                  value={scale}
+                  onChange={(e) => setScale(parseFloat(e.target.value))}
+                  className="w-full h-6 accent-blue-600 touch-pan-y cursor-pointer"
+                />
+              </div>
 
-      <div className="flex flex-col items-center gap-2">
-        <span className="text-sm text-gray-600 font-medium">에셋 회전</span>
-        <div className="flex justify-center gap-3">
-          <button
-            type="button"
-            onClick={() => handleRotate(-10)}
-            className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
-            aria-label="왼쪽으로 회전"
-          >
-            ↺ 좌
-          </button>
-          <button
-            type="button"
-            onClick={() => handleRotate(10)}
-            className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
-            aria-label="오른쪽으로 회전"
-          >
-            ↻ 우
-          </button>
-          <button
-            type="button"
-            onClick={() => setRotation(0)}
-            disabled={rotation === 0}
-            className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="회전 초기화"
-          >
-            초기화
-          </button>
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-sm text-gray-600 font-medium">
+                  스티커 회전
+                </span>
+                <div className="flex justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleRotate(-10)}
+                    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                    aria-label="왼쪽으로 회전"
+                  >
+                    ↺ 좌
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRotate(10)}
+                    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                    aria-label="오른쪽으로 회전"
+                  >
+                    ↻ 우
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRotation(0)}
+                    disabled={rotation === 0}
+                    className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="회전 초기화"
+                  >
+                    초기화
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* 2. 배경 조절: 항상 노출 */}
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-sm text-gray-600 font-medium">
+              배경 이미지 조절
+            </span>
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => setBgScale((s) => Math.min(s + 0.1, 2.5))}
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+              >
+                + 확대
+              </button>
+              <button
+                onClick={() => {
+                  if (bgScale > 1) {
+                    setBgScale((s) => Math.max(s - 0.1, 1))
+                  }
+                }}
+                disabled={bgScale <= 1}
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                - 축소
+              </button>
+              <button
+                onClick={() => {
+                  setBgScale(1)
+                  setBgOffset({ x: 0, y: 0 })
+                }}
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+              >
+                초기화
+              </button>
+            </div>
+            <div className="flex justify-center flex-wrap gap-2">
+              <button
+                onClick={() => setBgOffset((o) => ({ ...o, y: o.y - 10 }))}
+                disabled={bgScale === 1}
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+              >
+                ⬆️
+              </button>
+              <button
+                onClick={() => setBgOffset((o) => ({ ...o, y: o.y + 10 }))}
+                disabled={bgScale === 1}
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+              >
+                ⬇️
+              </button>
+              <button
+                onClick={() => setBgOffset((o) => ({ ...o, x: o.x - 10 }))}
+                disabled={bgScale === 1}
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+              >
+                ⬅️
+              </button>
+              <button
+                onClick={() => setBgOffset((o) => ({ ...o, x: o.x + 10 }))}
+                disabled={bgScale === 1}
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+              >
+                ➡️
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </>
-  )}
-
-  {/* 2. 배경 조절: 항상 노출 */}
-  <div className="flex flex-col items-center gap-2">
-    <span className="text-sm text-gray-600 font-medium">배경 이미지 조절</span>
-    <div className="flex justify-center gap-3">
-      <button
-        onClick={() => setBgScale((s) => Math.min(s + 0.1, 2.5))}
-        className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
-      >
-        + 확대
-      </button>
-      <button
-        onClick={() => {
-          if (bgScale > 1) {
-            setBgScale((s) => Math.max(s - 0.1, 1))
-          }
-        }}
-        disabled={bgScale <= 1}
-        className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        - 축소
-      </button>
-      <button
-        onClick={() => {
-          setBgScale(1)
-          setBgOffset({ x: 0, y: 0 })
-        }}
-        className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
-      >
-        초기화
-      </button>
-    </div>
-    <div className="flex justify-center flex-wrap gap-2">
-      <button
-        onClick={() => setBgOffset((o) => ({ ...o, y: o.y - 10 }))}
-        disabled={bgScale === 1}
-        className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
-      >
-        ⬆️
-      </button>
-      <button
-        onClick={() => setBgOffset((o) => ({ ...o, y: o.y + 10 }))}
-        disabled={bgScale === 1}
-        className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
-      >
-        ⬇️
-      </button>
-      <button
-        onClick={() => setBgOffset((o) => ({ ...o, x: o.x - 10 }))}
-        disabled={bgScale === 1}
-        className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
-      >
-        ⬅️
-      </button>
-      <button
-        onClick={() => setBgOffset((o) => ({ ...o, x: o.x + 10 }))}
-        disabled={bgScale === 1}
-        className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
-      >
-        ➡️
-      </button>
-    </div>
-  </div>
-</div>
-
 
         {downloadUrl && (
           <div className="mt-5 space-y-3">
@@ -618,16 +630,47 @@ ctx.drawImage(
                 )}
                 {/* iOS에서도 파일 다운로드 옵션 제공 */}
                 <DownloadButton />
+                <p className="text-xs text-center text-gray-500 mt-3">
+                  텔레그램, 인스타그램, 페이스북 등 일부 앱의 내부
+                  브라우저에서는 이미지가 정상적으로 다운로드되지 않을 수
+                  있습니다. <br className="sm:hidden" />
+                  <a
+                    href={
+                      typeof window !== 'undefined' ? window.location.href : '/'
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline text-blue-600 font-medium"
+                  >
+                    외부 브라우저(크롬, 사파리 등)
+                  </a>
+                  에서 열어주세요.
+                </p>
               </>
             )}
 
             {/* Android 모바일 환경 렌더링 */}
             {platformInfo.isAndroid && (
               <>
-                {/* Android는 다운로드를 우선 노출 (요청 기준) */}
-                <DownloadButton />
                 {/* Android 공유 버튼 */}
                 {platformInfo.canShare && <ShareButton text="공유하기" />}
+                <DownloadButton />
+                <p className="text-xs text-center text-gray-500 mt-3">
+                  텔레그램, 인스타그램, 페이스북 등 일부 앱의 내부
+                  브라우저에서는 이미지가 정상적으로 다운로드되지 않을 수
+                  있습니다. <br className="sm:hidden" />
+                  <a
+                    href={
+                      typeof window !== 'undefined' ? window.location.href : '/'
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline text-blue-600 font-medium"
+                  >
+                    외부 브라우저(크롬, 사파리 등)
+                  </a>
+                  에서 열어주세요.
+                </p>
               </>
             )}
 
