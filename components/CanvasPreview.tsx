@@ -451,7 +451,7 @@ ctx.drawImage(
       <div className="mx-auto w-full max-w-[360px] overflow-hidden bg-gray-50 border border-gray-200 rounded-2xl px-4 py-5">
         {isMobile && !isFullAsset && (
           <p className="mb-2 text-xs text-gray-500">
-            📍 에셋을 길게(1초) 누르면 이동할 수 있어요!
+            📍 에셋을 길게(1초 이상) 누르면 이동할 수 있어요!
           </p>
         )}
 
@@ -483,7 +483,7 @@ ctx.drawImage(
                 htmlFor="scale-slider"
                 className="text-sm text-gray-600 font-medium"
               >
-                크기 조절
+                에셋 크기 조절
               </label>
               <input
                 id="scale-slider"
@@ -498,7 +498,7 @@ ctx.drawImage(
             </div>
             <div className="flex flex-col items-center gap-2">
               <span className="text-sm text-gray-600 font-medium">
-                이미지 회전
+                에셋 회전
               </span>
               <div className="flex justify-center gap-3">
                 <button
@@ -582,12 +582,6 @@ ctx.drawImage(
   >
     초기화
   </button>
-                   </div>
-</div>
-</div>
-
-
-            </div>
           </div>
         )}
 
