@@ -585,6 +585,7 @@ ctx.drawImage(
           </div>
                </div>
               </div>
+              </div>
         )}
 
         {downloadUrl && (
