@@ -1,3 +1,4 @@
+// CanvasPreview.tsx (통합: 기존 기능 + 배경 조정 추가)
 'use client'
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
@@ -103,10 +104,7 @@ export default function CanvasPreview({ image, overlay, onDownload, onReset }: P
     <div className="mt-1 text-center select-none">
       <div className="mx-auto w-full max-w-[360px] overflow-hidden bg-gray-50 border border-gray-200 rounded-2xl px-4 py-5">
         <div className="relative w-full max-w-[320px] mx-auto">
-          <canvas
-            ref={canvasRef}
-            className="block w-full border border-gray-300 rounded bg-white"
-          />
+          <canvas ref={canvasRef} className="block w-full border border-gray-300 rounded bg-white" />
         </div>
 
         <div className="mt-4 space-y-3">
