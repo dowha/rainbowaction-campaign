@@ -361,11 +361,13 @@ export default function CanvasPreview({
     const file = new File([blob], 'rainbowaction-profile.png', {
       type: 'image/png',
     })
+
+    const shareUrl = 'https://profile.rainbowaction.kr/?ref=share'
     const shareData = {
       files: [file],
-      title: '캠페인 이미지',
+      title: '나의 수호동지 프로필',
       text: '나의 수호동지 프로필 이미지를 공유합니다!',
-      url: 'https://profile.rainbowaction.kr/',
+      url: shareUrl,
     }
 
     try {
@@ -569,7 +571,7 @@ export default function CanvasPreview({
                   setBgScale(1)
                   setBgOffset({ x: 0, y: 0 })
                 }}
-                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition "
               >
                 초기화
               </button>
@@ -578,7 +580,7 @@ export default function CanvasPreview({
               <button
                 onClick={() => setBgOffset((o) => ({ ...o, y: o.y - 10 }))}
                 disabled={bgScale === 1}
-                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="배경 위로 이동"
               >
                 ⬆️
@@ -586,7 +588,7 @@ export default function CanvasPreview({
               <button
                 onClick={() => setBgOffset((o) => ({ ...o, y: o.y + 10 }))}
                 disabled={bgScale === 1}
-                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="배경 아래로 이동"
               >
                 ⬇️
@@ -594,7 +596,7 @@ export default function CanvasPreview({
               <button
                 onClick={() => setBgOffset((o) => ({ ...o, x: o.x - 10 }))}
                 disabled={bgScale === 1}
-                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="배경 왼쪽으로 이동"
               >
                 ⬅️
@@ -602,7 +604,7 @@ export default function CanvasPreview({
               <button
                 onClick={() => setBgOffset((o) => ({ ...o, x: o.x + 10 }))}
                 disabled={bgScale === 1}
-                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition"
+                className="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="배경 오른쪽으로 이동"
               >
                 ➡️
@@ -641,7 +643,7 @@ export default function CanvasPreview({
                   >
                     외부 브라우저
                   </a>
-                  에서 다시 접속해 주세요.
+                  에서 다시 접속해주세요.
                 </p>
               </>
             )}

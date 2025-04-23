@@ -179,7 +179,7 @@ export default function Uploader({ onSelect, onClear }: Props) {
               className={`cursor-pointer px-4 py-2 rounded-md transition text-sm ${
                 uploadedFileName
                   ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                  : 'bg-yellow-500 text-white hover:bg-yellow-600'
+                  : 'bg-amber-200 text-gray-800 hover:bg-amber-300'
               }`}
             >
               {uploadedFileName ? '📂 다른 사진 선택' : '📁 앨범에서 사진 선택'}

@@ -12,6 +12,7 @@ export default function Home() {
   const [image, setImage] = useState<File | null>(null)
   const [overlayFile, setOverlayFile] = useState('asset01.png')
   const [isInAppBrowser, setIsInAppBrowser] = useState(false)
+  const [referralSource, setReferralSource] = useState<string | null>(null)
 
   useEffect(() => {
     if (!localStorage.getItem('anonymous_id')) {
@@ -21,7 +22,7 @@ export default function Home() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'instant' }) // 'instant'는 일부 브라우저에서 무시될 수 있음
+      window.scrollTo({ top: 0, behavior: 'instant' })
       document.documentElement.scrollTop = 0
       document.body.scrollTop = 0
     }, 100)
@@ -59,10 +60,17 @@ export default function Home() {
     setIsInAppBrowser(isInApp)
   }, [])
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const refValue = urlParams.get('ref')
+      setReferralSource(refValue)
+    }
+  }, [])
+
   return (
     <>
       <Head>
-        {/* ... (Head content remains the same) ... */}
         <title>수호동지 프로필 꾸미기</title>
         <meta
           name="description"
@@ -90,14 +98,12 @@ export default function Home() {
         />
       </Head>
 
-      {/* Outermost container: sets flex column, min height, and background */}
       <div
         className="flex flex-col min-h-screen bg-center bg-cover bg-no-repeat"
         style={{ backgroundImage: "url('/bg.png')", minHeight: '100dvh' }}
       >
-        {/* Fixed Header */}
         <header className="sticky top-0 z-50 w-full">
-          <div className="max-w-[420px] mx-auto h-20 relative py-5 bg-white">
+          <div className="max-w-[420px] mx-auto h-20 relative py-5 bg-white border-b border-[#E1A8BD]">
             <Image
               src="/logo.png"
               alt="로고"
@@ -112,8 +118,7 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Main content area */}
-        <main className="flex-1 min-h-0 w-full max-w-[420px] mx-auto bg-white flex flex-col border-t border-[#E1A8BD]">
+        <main className="flex-1 min-h-0 w-full max-w-[420px] mx-auto bg-white flex flex-col">
           <div className="w-full px-4 pt-4 pb-6 flex-grow">
             <div
               key={step}
@@ -121,11 +126,12 @@ export default function Home() {
             >
               {step === 0 ? (
                 <div className="text-center space-y-6">
-                  {isInAppBrowser && (
+                  {!isInAppBrowser && (
                     <p className="text-xs text-red-800 px-4 py-3 border border-red-300 bg-red-50 rounded-3xl animate-pulse">
                       ⚠️ 텔레그램, 인스타그램, 페이스북 등 일부 앱의 내부
                       브라우저에서는 이미지가 정상적으로 다운로드되지 않을 수
-                      있습니다.{' '}
+                      있습니다.
+                      <br />
                       <a
                         href={
                           typeof window !== 'undefined'
@@ -138,7 +144,7 @@ export default function Home() {
                       >
                         외부 브라우저
                       </a>
-                      (크롬, 사파리 등)에서 다시 접속해 주세요.
+                      (크롬, 사파리 등)에서 <strong>다시</strong> 접속해주세요.
                     </p>
                   )}
                   <div className="bg-white border border-[#84C0D3] rounded-2xl px-6 py-8">
@@ -158,6 +164,7 @@ export default function Home() {
                             anonymous_id: localStorage.getItem('anonymous_id'),
                             user_agent: navigator.userAgent,
                             referrer: document.referrer || null,
+                            source: referralSource,
                           })
                         } catch (err) {
                           console.error('Supabase 기록 실패:', err)
@@ -172,8 +179,8 @@ export default function Home() {
                   </div>
 
                   <p className="text-xs text-green-800 px-4 py-3 border border-green-300 bg-green-50 rounded-2xl">
-                    🔒 이미지는 브라우저에서만 처리되며, 서버에 저장되지
-                    않습니다.
+                    🔒 이미지는 브라우저에서만 처리되며, 서버에{' '}
+                    <strong>저장되지 않습니다.</strong>
                   </p>
                 </div>
               ) : step === 1 || !image ? (
@@ -211,14 +218,14 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="underline underline-offset-2"
               >
-                무지개 수호대 페이지
+                <strong>무지개 수호대 페이지</strong>
               </a>
               에서 확인하실 수 있어요.
             </div>
             {/* Existing Footer Info */}
             <p className="pt-4 pb-1 text-black">
               <span className="text-[#2A559B]">
-                <strong>후원계좌</strong>
+                <strong>후원하기</strong>
               </span>
               <br />
               <a
