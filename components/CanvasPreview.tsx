@@ -363,12 +363,14 @@ export default function CanvasPreview({
     })
 
     const shareUrl = 'https://profile.rainbowaction.kr/?ref=share'
-    const shareData = {
-      files: [file],
-      title: '나의 수호동지 프로필',
-      text: '나의 수호동지 프로필 이미지를 공유합니다!',
-      url: shareUrl,
-    }
+const shareData = {
+  files: [file],
+  title: '나의 수호동지 프로필',
+  text: `수호동지 프로필 꾸미기!
+#민주주의지키는성소수자
+#성소수자지키는민주주의`,
+  url: shareUrl,
+}
 
     try {
       if (navigator.canShare && navigator.canShare(shareData)) {
@@ -451,6 +453,49 @@ export default function CanvasPreview({
       <strong>이미지 다운로드</strong>
     </a>
   )
+
+const TwitterShareButton = () => {
+  const shareText = `수호동지 프로필 꾸미기!\n#민주주의지키는성소수자\n#성소수자지키는민주주의`
+  const shareUrl = 'https://profile.rainbowaction.kr/?ref=twitter'
+  const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+    shareText
+  )}&url=${encodeURIComponent(shareUrl)}`
+
+  const handleClick = async () => {
+    try {
+      await supabase.from('image_creations').insert({
+ asset: null, // 🎯 여기만 null로
+        anonymous_id: localStorage.getItem('anonymous_id'),
+        user_agent: navigator.userAgent,
+        stage: 'shared_twitter',
+      })
+    } catch (e) {
+      console.error('Supabase 기록 실패:', e)
+    }
+  }
+
+  return (
+<a
+  href={twitterIntentUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  onClick={handleClick}
+  className="inline-flex items-center gap-1 text-xs text-gray-700 hover:text-blue-600 transition border-b border-current no-underline hover:no-underline"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1200 1227"
+    fill="currentColor"
+    className="w-3 h-3"
+    aria-hidden="true"
+  >
+        <path d="M1133.98 138.37c-42.17 18.72-87.5 31.35-135.16 37.02 48.58-29.14 85.89-75.27 103.45-130.31-45.45 26.79-95.76 46.24-149.26 56.74C909.77 40.07 850.82 10 785.77 10c-125.27 0-226.9 105.42-226.9 235.49 0 18.49 1.98 36.45 6.12 53.68-188.62-10.1-355.85-105.94-467.85-251.65-19.49 35.26-30.62 76.24-30.62 119.88 0 82.8 40.36 155.91 101.66 198.65-37.33-1.19-72.39-11.76-103.1-29.24v2.88c0 115.66 77.56 212.22 180.54 234.16-18.9 5.39-38.81 8.38-59.4 8.38-14.5 0-28.61-1.38-42.37-3.96 28.67 94.27 111.72 162.88 210.14 164.74-76.97 63.49-174.1 101.37-279.52 101.37-18.16 0-36.05-1.14-53.61-3.14 99.63 66.01 218.1 104.47 345.39 104.47 414.28 0 640.67-364.17 640.67-680.03 0-10.4-.24-20.68-.72-30.84 44.03-33.04 82.24-74.28 112.38-121.37z" />      </svg>  
+  <span><strong>수호동지 프로필 꾸미기</strong> X(트위터)에 알리기</span>
+</a>
+
+  )
+}
+
 
   // --- Render ---
   return (
@@ -620,15 +665,20 @@ export default function CanvasPreview({
             {platformInfo.isPC && (
               <>
                 <DownloadButton />
-                {platformInfo.canShare && <ShareButton text="공유하기" />}
+                {platformInfo.canShare && <ShareButton text="공유하기" />
+                  }
               </>
             )}
 
             {platformInfo.isIOS && (
               <>
                 {platformInfo.canShare && (
+              
                   <ShareButton text="공유하기(사진첩 저장하기)" />
+               
+                 
                 )}
+                
                 <DownloadButton />
                 <p className="text-xs text-center text-gray-500 mt-3">
                   일부 앱 내 브라우저에서는 다운로드가 제한될 수 있어요.
@@ -651,8 +701,12 @@ export default function CanvasPreview({
             {platformInfo.isAndroid && (
               <>
                 {platformInfo.canShare && (
+         
                   <ShareButton text="공유하기(이미지 복사하기)" />
+               
+          
                 )}
+                 
                 <DownloadButton />
                 <p className="text-xs text-center text-gray-500 mt-3">
                   일부 앱 내 브라우저에서는 다운로드가 제한될 수 있어요.
@@ -675,6 +729,9 @@ export default function CanvasPreview({
           </div>
         )}
       </div>
+       <div className="mt-6 text-center">
+      <TwitterShareButton />
+         </div>
     </div>
   )
 }
