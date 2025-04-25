@@ -464,7 +464,7 @@ const TwitterShareButton = () => {
   const handleClick = async () => {
     try {
       await supabase.from('image_creations').insert({
-        asset: 'rainbowaction-profile.png',
+ asset: null, // 🎯 여기만 null로
         anonymous_id: localStorage.getItem('anonymous_id'),
         user_agent: navigator.userAgent,
         stage: 'shared',
