@@ -467,7 +467,7 @@ const TwitterShareButton = () => {
  asset: null, // 🎯 여기만 null로
         anonymous_id: localStorage.getItem('anonymous_id'),
         user_agent: navigator.userAgent,
-        stage: 'shared',
+        stage: 'shared_twitter',
       })
     } catch (e) {
       console.error('Supabase 기록 실패:', e)
