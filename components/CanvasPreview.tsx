@@ -650,16 +650,20 @@ const shareData = {
             {platformInfo.isPC && (
               <>
                 <DownloadButton />
-                {platformInfo.canShare && <ShareButton text="공유하기" />}
+                {platformInfo.canShare && <ShareButton text="공유하기" />
+                  }<TwitterShareButton />
               </>
             )}
 
             {platformInfo.isIOS && (
               <>
                 {platformInfo.canShare && (
+              
                   <ShareButton text="공유하기(사진첩 저장하기)" />
-                <TwitterShareButton />
+               
+                 
                 )}
+                 <TwitterShareButton />
                 <DownloadButton />
                 <p className="text-xs text-center text-gray-500 mt-3">
                   일부 앱 내 브라우저에서는 다운로드가 제한될 수 있어요.
@@ -682,9 +686,12 @@ const shareData = {
             {platformInfo.isAndroid && (
               <>
                 {platformInfo.canShare && (
+         
                   <ShareButton text="공유하기(이미지 복사하기)" />
-                <TwitterShareButton />
+               
+          
                 )}
+                 <TwitterShareButton />
                 <DownloadButton />
                 <p className="text-xs text-center text-gray-500 mt-3">
                   일부 앱 내 브라우저에서는 다운로드가 제한될 수 있어요.
